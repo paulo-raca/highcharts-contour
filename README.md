@@ -1,5 +1,5 @@
-highcharts-contour
-==================
+Contour curves for Highcharts
+=============================
 
 This is a plugin for Highcharts to display contour curves (Or smooth heatmaps, if you prefer)
 
@@ -10,18 +10,17 @@ This extension works by triangulating all the data points and filling each trian
 Triangulation is performed either on a regular grid (Every 'grid_width' vertexes make a row/column) or using [Delaunay](http://en.wikipedia.org/wiki/Delaunay_triangulation) (In case your data is irregular or you are just too lazy). If you decide to use Delaunay, you will have to include the library for [Fast Delaunay Triangulation in JavaScript](https://github.com/ironwallaby/delaunay)
 
 
-Demo
-====
+Demos
+=====
 
 [Basic heatmap demo](http://jsfiddle.net/nsj5uzdw/)
 --------------------
 
 This is the same demo you can find at http://www.highcharts.com/maps/demo/heatmap, but chart type was changed to 'contour'. Note that it automatically used Delaunay for triangulation, so that you didn't need any extra effort ;)
 
-[Random Point locations](http://jsfiddle.net/1peapgLw/)
+[Countour curve](http://jsfiddle.net/1peapgLw/)
 ------------------------
-This demo plots a radial function, but the locations of the data points are spread randomly.
-You can create a good chart even when you cannot sample your data in a rectangular grid
+This demo uses a regular grid to plot a saddle point. The color axis is split is several constant-color ranges, creating contour lines.
 
 [Random Point locations](http://jsfiddle.net/f7ofc3q3/)
 ------------------------
