@@ -8,24 +8,24 @@
     },
     "licenses": [
         {
-        "type": "WTFPL – Do What the Fuck You Want to Public License",
-        "url": "http://www.wtfpl.net/"
+            "type": "WTFPL – Do What the Fuck You Want to Public License",
+            "url": "http://www.wtfpl.net/"
         }
     ],
     "dependencies": {
         "highcharts": "4.0.4",
         "highcharts-heatmap": "4.0.4",
-        "delaunay": "1.0.0",
+        "delaunay": "1.0.0"
     },
     "description": "Displays contour curves from sampled data. You can think of it as a 'smoothed heatmap'",
     "keywords": [
         "heatmap",
-        "contour",
+        "contour"
     ],
     "demo": [
         "http://jsfiddle.net/nsj5uzdw/",
         "http://jsfiddle.net/1peapgLw/",
         "http://jsfiddle.net/f7ofc3q3/",
-        "http://jsfiddle.net/mqxmraL2/",
-    ],
+        "http://jsfiddle.net/mqxmraL2/"
+    ]
 }
