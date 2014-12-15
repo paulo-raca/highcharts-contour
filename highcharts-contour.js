@@ -1,10 +1,10 @@
 /**
- * @license @product.name@ JS v@product.version@ (@product.date@)
- *
- * (c) 2011-2014 Torstein Honsi
- *
- * License: www.highcharts.com/license
- */
+* @license @product.name@ JS v@product.version@ (@product.date@)
+*
+* (c) 2011-2014 Torstein Honsi
+*
+* License: www.highcharts.com/license
+*/
 
 /*global HighchartsAdapter*/
 (function (Highcharts) {
@@ -15,6 +15,8 @@ var defaultOptions = Highcharts.getOptions(),
 	extendClass = Highcharts.extendClass,
 	merge = Highcharts.merge,
 	seriesTypes = Highcharts.seriesTypes,
+	wrap = Highcharts.wrap,
+	perspective = Highcharts.perspective,
 	eps = 0.0001,
 	SVG_NS = "http://www.w3.org/2000/svg";
 	XLINK_NS = "http://www.w3.org/1999/xlink",
@@ -23,6 +25,8 @@ var defaultOptions = Highcharts.getOptions(),
 /**
  * Extend the default options with map options
  */
+
+
 defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.heatmap, {
 	marker: merge(
 		{}, {
@@ -35,59 +39,94 @@ defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.heatmap, {
 });
 
 /**
-* Normalize a value into 0-1 range
-*/
+ * Normalize a value into 0-1 range
+ */
 Highcharts.ColorAxis.prototype.toRelativePosition = function(value) {
-    if (this.isLog) {
-        value = this.val2lin(value);
-    }
+	if (this.isLog) {
+		value = this.val2lin(value);
+	}
     return (value - this.min) / ((this.max - this.min) || 1);
 };
 
 // The Heatmap series type
 seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 	type: 'contour',
+	axisTypes: ['xAxis', 'yAxis', 'colorAxis'],
+	parallelArrays: ['x', 'y', 'value'],
+	colorKey: 'value',
 	init: function () {
 		seriesTypes.heatmap.prototype.init.apply(this, arguments);
-		
+
 		//We don't want "padding" between our data points and the margin
 		this.pointRange = 0;
+		this.is3d = this.chart.is3d && this.chart.is3d();
 		this.xAxis.axisPointRange = 0;
 		this.yAxis.axisPointRange = 0;
-		
+
 		//FIXME: I have no idea why, but it believes my chart is always hidden!
 		//This causes a _HUGE_ slowdown while the whole thing is copied over on chart.cloneRenderTo()
 		this.chart.renderer.isHidden = function() {
-		  return false;
+			return false;
 		};
 	},
-	translateColors: function () {
-		//Hide the markers, so that the surface is visible instead.
-		//Keep in mind that we draw the markers anyway, so that the tooltip still works
-		each(this.data, function (point) {
-			point.color = 'rgba(0,0,0,0)';
+	translate: function () {
+		seriesTypes.heatmap.prototype.translate.apply(this, arguments);
+
+		if (!this.is3d) {
+			return;
+		}
+
+		var series = this,
+			chart = series.chart,
+			options3d = series.chart.options.chart.options3d,
+			depth = options3d.depth,
+			alpha = options3d.alpha,
+			beta = options3d.beta,
+			origin = {
+				x: chart.inverted ? chart.plotHeight / 2 : chart.plotWidth / 2,
+				y: chart.inverted ? chart.plotWidth / 2 : chart.plotHeight / 2,
+				z: options3d.depth,
+				vd: options3d.viewDistance
+			},
+			zMax = (chart.options.zAxis && chart.options.zAxis.min != null) ? chart.options.zAxis.min : this.valueMin,
+			zMin = (chart.options.zAxis && chart.options.zAxis.max != null) ? chart.options.zAxis.max : this.valueMax,
+			rangeModifier = depth / (zMax - zMin);
+
+		Highcharts.each(series.data, function (point) {
+			var p3d = {
+				x: point.plotX,
+				y: point.plotY,
+				z: (point.z - zMin) * rangeModifier
+			};
+			p3d = perspective([p3d], alpha, beta, origin)[0];
+
+			point.plotXold = point.plotX;
+			point.plotYold = point.plotY;
+
+			point.plotX = p3d.x;
+			point.plotY = p3d.y;
+			point.plotZ = p3d.z;
 		});
 	},
-	drawTriangle: function (group, triangle_index, a,b,c) {
+	drawPoints: function(){},
+	drawTriangle: function (triangle_data, points, edgeCount) {
 		var fill;
 		var colorKey = this.colorKey;
-		var renderer = this.chart.renderer;		
-		var triangle_data = this.triangles[triangle_index];
-		
-		if (!triangle_data) {
-			triangle_data = this.triangles[triangle_index] = {};
-		}
-		
+		var renderer = this.chart.renderer;
+		var a = points[triangle_data.a];
+		var b = points[triangle_data.b];
+		var c = points[triangle_data.c];
+
 		//Normalized values of the vertexes
 		var values = [
 			this.colorAxis.toRelativePosition(a[colorKey]),
 			this.colorAxis.toRelativePosition(b[colorKey]),
 			this.colorAxis.toRelativePosition(c[colorKey])
 		];
-		
+
 		//All vertexes have the same value/color
 		if (Math.abs(values[0] - values[1]) < eps && Math.abs(values[0] - values[2]) < eps) {
-			fill = this.colorAxis.toColor((a.value+b.value+c.value)/3);
+			fill = this.colorAxis.toColor((values[0]+values[1]+values[2])/3);
 		//Use a linear gradient to interpolate values/colors
 		} else {
 			//Find function where "Value = A*X + B*Y + C" at the 3 vertexes
@@ -99,10 +138,10 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			var A = m.mtx[0][3];
 			var B = m.mtx[1][3];
 			var C = m.mtx[2][3];
-			
+
 			//For convenience, we place our gradient control points at (k*A, k*B)
 			//We can find the value of K as:
-			// Value = A*X + B*Y + C = 
+			// Value = A*X + B*Y + C =
 			// Value = A*(A*k) + B*(B*k) + C
 			// Value = A²*k + B²*k + C
 			// Value = k*(A² + B²) + C
@@ -112,8 +151,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			var x1 = k0*A;
 			var y1 = k0*B;
 			var x2 = k1*A;
-			var y2 = k1*B;			
-			
+			var y2 = k1*B;
+
 			// Assign a linear gradient that interpolates all 3 vertexes
 			if (renderer.isSVG) {
 				//SVGRenderer implementation of gradient is slow and leaks memory -- Lets do it ourselves
@@ -136,7 +175,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 						y1: y1,
 						x2: x2,
 						y2: y2,
-						spreadMethod:'pad', 
+						spreadMethod: 'pad',
 						gradientUnits:'userSpaceOnUse'
 					},
 					stops: this.colorAxis.options.stops || [
@@ -146,8 +185,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 				};
 			}
 		}
-		
-		
+
+
 		var path = [
 			'M',
 			a.plotX + ',' + a.plotY,
@@ -157,7 +196,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			c.plotX + ',' + c.plotY,
 			'Z'
 		];
-		
+
 		if (triangle_data.shape) {
 			triangle_data.shape.attr({
 				d: path,
@@ -169,23 +208,58 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 					'shape-rendering': 'crispEdges',
 					fill: fill
 				})
-				.add(group);
 		}
+		triangle_data.shape.add(this.surface_group);
 
+		/*
+		var edge_path = [];
+		var processEdge = function(a,b) {
+			if (!edgeCount[b + '-' + a]) {
+				if (edgeCount[a + '-' + b]-- == 1) {
+					edge_path.push(
+						'M',
+						points[a].plotX + ',' + points[a].plotY,
+						'L',
+						points[b].plotX + ',' + points[b].plotY);
+				}
+			}
+		}
+		processEdge(triangle_data.a,triangle_data.b);
+		processEdge(triangle_data.b,triangle_data.c);
+		processEdge(triangle_data.c,triangle_data.a);
+		if (edge_path.length) {
+			if (triangle_data.edge) {
+				triangle_data.edge.attr({
+					d: edge_path,
+				});
+			} else {
+				triangle_data.edge = renderer.path(edge_path)
+					.attr({
+						'stroke-linecap': 'round',
+						'stroke': 'black',
+						'stroke-width': 2,
+					})
+			}
+			triangle_data.edge.add(this.surface_group);
+		} else if (triangle_data.edge) {
+			triangle_data.edge.destroy();
+			triangle_data.edge = null;
+		}
+		*/
 	},
 	drawGraph: function () {
 		var series = this,
 			i,j,
 			points = series.points,
 			options = this.options,
-			renderer = series.chart.renderer;
+			renderer = series.chart.renderer,
 			grid_width = options.grid_width;
-			
+
 		if (!series.surface_group) {
 			series.surface_group = renderer.g().add(series.group);
 			series.triangles = [];
 		}
-		
+
 		//When creating a SVG, we create a "base" gradient with the right colors,
 		//And extend it on every triangle to define the orientation.
 		if (renderer.isSVG) {
@@ -196,7 +270,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 						y1: 0,
 						x2: 1,
 						y2: 0,
-						spreadMethod:'pad', 
+						spreadMethod: 'pad',
 						gradientUnits:'userSpaceOnUse'
 					},
 					stops: this.colorAxis.options.stops || [
@@ -207,66 +281,122 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			});
 			this.base_gradient_id = /(#.*)[)]/.exec(fake_rect.attr('fill'))[1];
 		}
-		
+
 		var group = series.surface_group;
+		var egde_count = {};
 		var triangle_count = 0;
+		var appendEdge = function(a,b) {
+			egde_count[a+'-'+b] = (egde_count[a+'-'+b] || 0) + 1;
+		};
+		var appendTriangle = function(a,b,c) {
+			var triangle_data = series.triangles[triangle_count];
+			if (!triangle_data) {
+				triangle_data = series.triangles[triangle_count] = {};
+			}
+			triangle_count++;
+
+			//Make sure the shape is counter-clockwise
+			if (shapeArea([points[a], points[b], points[c]], 'plotX', 'plotY') > 0) {
+				var tmp = a;
+				a = b;
+				b = tmp;
+			}
+			triangle_data.a = a;
+			triangle_data.b = b;
+			triangle_data.c = c;
+
+			appendEdge(a,b);
+			appendEdge(b,c);
+			appendEdge(c,a);
+
+			triangle_data.z_order = [(points[a].plotZ + points[b].plotZ + points[c].plotZ)/3];
+		};
+
+
 		if (grid_width) {
+			var triangles = []
 			//points are in a nice regular grid
 			for (i=1; i<points.length/grid_width; i++) {
 				for (j=1; j<options.grid_width; j++) {
-					this.drawTriangle(
-						group,
-						triangle_count++,
-						points[( i )*grid_width + (j-1)], 
-						points[(i-1)*grid_width + (j-1)], 
-						points[(i-1)*grid_width + ( j )]);
-					
-					this.drawTriangle(
-						group,
-						triangle_count++,
-						points[( i )*grid_width + ( j )], 
-						points[( i )*grid_width + (j-1)], 
-						points[(i-1)*grid_width + ( j )]);
+					appendTriangle(
+						( i )*grid_width + (j-1),
+						(i-1)*grid_width + (j-1),
+						(i-1)*grid_width + ( j ));
+					appendTriangle(
+						( i )*grid_width + ( j ),
+						( i )*grid_width + (j-1),
+						(i-1)*grid_width + ( j ));
 				}
 			}
 		} else {
 			//If points are not in a regular grid, use Delaunay triangulation.
 			//You will have to include this: https://github.com/ironwallaby/delaunay
-			var triangles = Delaunay.triangulate(points.map(function(x) {
-				return [x.plotX, x.plotY];
-			}));
+			var triangles = Delaunay.triangulate(points.map(
+				this.is3d ?
+				function(x) {
+					return [x.plotXold, x.plotYold];
+				} : function(x) {
+					return [x.plotX, x.plotY];
+				}));
 			for (i=0; i<triangles.length; i+=3) {
-				this.drawTriangle(
-					group,
-					triangle_count++,
-					points[triangles[i]], 
-					points[triangles[i+1]], 
-					points[triangles[i+2]]);
+				appendTriangle(
+					triangles[i],
+					triangles[i+1],
+					triangles[i+2]);
 			}
 		}
-		
+
 		// Remove extra unused triangles from previous rendering
 		for (i=triangle_count; i<series.triangles.length; i++) {
 			if (series.triangles[i].shape) {
 				series.triangles[i].shape.destroy();
+			}
+			if (series.triangles[i].edge) {
+				series.triangles[i].edge.destroy();
 			}
 			if (series.triangles[i].gradient) {
 				series.triangles[i].gradient.parentNode.removeChild(series.triangles[i].gradient);
 			}
 		}
 		series.triangles.splice(triangle_count, series.triangles.length - triangle_count);
+
+		series.triangles.sort(function (a,b) {
+			for (var i=0; i<3; i++) {
+				var ret = b.z_order[i] - a.z_order[i];
+				if (ret) {
+					return ret;
+				}
+			}
+			return 0;
+		});
+
+		// Render each triangle
+		for (i=0; i<triangle_count; i++) {
+			series.drawTriangle(series.triangles[i], points, egde_count);
+		}
 	}
 });
 
+//Shoelace algorithm -- http://en.wikipedia.org/wiki/Shoelace_formula
+
+function shapeArea(vertexes, xProperty, yProperty) {
+	var area = 0;
+	for (var i=0; i<vertexes.length; i++) {
+		var j = (i+1) % vertexes.length;
+		area += vertexes[i][xProperty]*vertexes[j][yProperty] - vertexes[j][xProperty]*vertexes[i][yProperty];
+	}
+	return area / 2;
+};
+
 // ==== Matrix functions =======
-	
+
 // http://rosettacode.org/wiki/Matrix_Transpose#JavaScript
 function Matrix(ary) {
 	this.mtx = ary;
 	this.height = ary.length;
 	this.width = ary[0].length;
 }
-	
+
 // http://rosettacode.org/wiki/Reduced_row_echelon_form#JavaScript
 Matrix.prototype.toReducedRowEchelonForm = function() {
 	var lead = 0, i, j;
