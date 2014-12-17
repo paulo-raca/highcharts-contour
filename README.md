@@ -18,20 +18,25 @@ Demos
 
 This is the same demo you can find at http://www.highcharts.com/maps/demo/heatmap, but chart type was changed to 'contour'. Note that it automatically used Delaunay for triangulation, so that you didn't need any extra effort ;)
 
+
 [Countour curve](http://jsfiddle.net/1peapgLw/)
 ------------------------
 This demo uses a regular grid to plot a saddle point. The color axis is split is several constant-color ranges, creating contour lines.
+
+
+[3-D demo](http://jsfiddle.net/y80jchon/)
+--------------------
+This demo demonstrates how to use this plugin to display 3-D contour curves
+
+Note that this relies on changes that are not in the main Highcharts distribution yet.
+
 
 [Random Point locations](http://jsfiddle.net/f7ofc3q3/)
 ------------------------
 This demo plots a radial function, but the locations of the data points are spread randomly.
 You can create a good chart even when you cannot sample your data in a rectangular grid
 
+
 [Random Data demo](http://jsfiddle.net/mqxmraL2/)
 --------------------
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
-
-
-[3-D demo](http://jsfiddle.net/y80jchon/)
---------------------
-This demo demonstrates how to use this plugin to display 3-D contour curves
