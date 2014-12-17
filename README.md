@@ -30,3 +30,8 @@ You can create a good chart even when you cannot sample your data in a rectangul
 [Random Data demo](http://jsfiddle.net/mqxmraL2/)
 --------------------
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
+
+
+[3-D demo](http://jsfiddle.net/y80jchon/)
+--------------------
+This demo demonstrates how to use this plugin to display 3-D contour curves
