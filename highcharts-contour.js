@@ -28,14 +28,8 @@ var defaultOptions = Highcharts.getOptions(),
 
 
 defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.heatmap, {
-	marker: merge(
-		{}, {
-		states: {
-			hover: {
-				color: 'rgba(255,0,0,0.2)'
-			}
-		}
-	})
+	marker: defaultOptions.plotOptions.scatter.marker,
+	//state: defaultOptions.plotOptions.scatter.states,
 });
 
 /**
@@ -48,12 +42,17 @@ Highcharts.ColorAxis.prototype.toRelativePosition = function(value) {
     return (value - this.min) / ((this.max - this.min) || 1);
 };
 
+Highcharts.Axis.prototype.drawCrosshair = function() {};
+
 // The Heatmap series type
 seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 	type: 'contour',
 	axisTypes: ['xAxis', 'yAxis', 'colorAxis'],
-	parallelArrays: ['x', 'y', 'value'],
+	parallelArrays: ['x', 'y', 'z', 'value'],
 	colorKey: 'value',
+	hasPointSpecificOptions: true,
+	getSymbol: seriesTypes.scatter.prototype.getSymbol,
+	drawPoints: Highcharts.Series.prototype.drawPoints,
 	init: function () {
 		seriesTypes.heatmap.prototype.init.apply(this, arguments);
 
@@ -80,16 +79,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			chart = series.chart,
 			options3d = series.chart.options.chart.options3d,
 			depth = options3d.depth,
-			alpha = options3d.alpha,
-			beta = options3d.beta,
-			origin = {
-				x: chart.inverted ? chart.plotHeight / 2 : chart.plotWidth / 2,
-				y: chart.inverted ? chart.plotWidth / 2 : chart.plotHeight / 2,
-				z: options3d.depth,
-				vd: options3d.viewDistance
-			},
-			zMax = (chart.options.zAxis && chart.options.zAxis.min != null) ? chart.options.zAxis.min : this.valueMin,
-			zMin = (chart.options.zAxis && chart.options.zAxis.max != null) ? chart.options.zAxis.max : this.valueMax,
+			zMin = (chart.options.zAxis && chart.options.zAxis.min != null) ? chart.options.zAxis.min : this.zMin,
+			zMax = (chart.options.zAxis && chart.options.zAxis.max != null) ? chart.options.zAxis.max : this.zMax,
 			rangeModifier = depth / (zMax - zMin);
 
 		Highcharts.each(series.data, function (point) {
@@ -98,19 +89,33 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 				y: point.plotY,
 				z: (point.z - zMin) * rangeModifier
 			};
-			p3d = perspective([p3d], alpha, beta, origin)[0];
+			point.plotXold = p3d.x;
+			point.plotYold = p3d.y;
+			point.plotZold = p3d.z;
 
-			point.plotXold = point.plotX;
-			point.plotYold = point.plotY;
-
+			p3d = perspective([p3d], chart, true)[0];
 			point.plotX = p3d.x;
 			point.plotY = p3d.y;
 			point.plotZ = p3d.z;
 		});
+		series.kdTree = null;
 	},
-	drawPoints: function(){},
+	getExtremes: function () {
+		// Get the extremes from the value data
+		Highcharts.Series.prototype.getExtremes.call(this, this.valueData);
+		this.valueMin = this.dataMin;
+		this.valueMax = this.dataMax;
+
+		Highcharts.Series.prototype.getExtremes.call(this, this.zData);
+		this.zMin = this.dataMin;
+		this.zMax = this.dataMax;
+
+		// Get the extremes from the y data
+		Highcharts.Series.prototype.getExtremes.call(this);
+	},
 	drawTriangle: function (triangle_data, points, edgeCount) {
 		var fill;
+		var chart = this.chart;
 		var colorKey = this.colorKey;
 		var renderer = this.chart.renderer;
 		var a = points[triangle_data.a];
@@ -211,41 +216,41 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		}
 		triangle_data.shape.add(this.surface_group);
 
-		/*
-		var edge_path = [];
-		var processEdge = function(a,b) {
-			if (!edgeCount[b + '-' + a]) {
-				if (edgeCount[a + '-' + b]-- == 1) {
-					edge_path.push(
-						'M',
-						points[a].plotX + ',' + points[a].plotY,
-						'L',
-						points[b].plotX + ',' + points[b].plotY);
+		if (edgeCount) {
+			var edge_path = [];
+			var processEdge = function(a,b) {
+				if (!edgeCount[b + '-' + a]) {
+					if (edgeCount[a + '-' + b]-- == 1) {
+						edge_path.push(
+							'M',
+							points[a].plotX + ',' + points[a].plotY,
+							'L',
+							points[b].plotX + ',' + points[b].plotY);
+					}
 				}
 			}
-		}
-		processEdge(triangle_data.a,triangle_data.b);
-		processEdge(triangle_data.b,triangle_data.c);
-		processEdge(triangle_data.c,triangle_data.a);
-		if (edge_path.length) {
-			if (triangle_data.edge) {
-				triangle_data.edge.attr({
-					d: edge_path,
-				});
-			} else {
-				triangle_data.edge = renderer.path(edge_path)
-					.attr({
-						'stroke-linecap': 'round',
-						'stroke': 'black',
-						'stroke-width': 2,
-					})
+			processEdge(triangle_data.a,triangle_data.b);
+			processEdge(triangle_data.b,triangle_data.c);
+			processEdge(triangle_data.c,triangle_data.a);
+			if (edge_path.length) {
+				if (triangle_data.edge) {
+					triangle_data.edge.attr({
+						d: edge_path,
+					});
+				} else {
+					triangle_data.edge = renderer.path(edge_path)
+						.attr({
+							'stroke-linecap': 'round',
+							'stroke': 'black',
+							'stroke-width': 2,
+						})
+				}
+				triangle_data.edge.add(this.surface_group);
+			} else if (triangle_data.edge) {
+				triangle_data.edge.destroy();
+				triangle_data.edge = null;
 			}
-			triangle_data.edge.add(this.surface_group);
-		} else if (triangle_data.edge) {
-			triangle_data.edge.destroy();
-			triangle_data.edge = null;
 		}
-		*/
 	},
 	drawGraph: function () {
 		var series = this,
@@ -253,7 +258,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			points = series.points,
 			options = this.options,
 			renderer = series.chart.renderer,
-			grid_width = options.grid_width;
+			grid_width = options.grid_width,
+			show_edges = options.showEdges;
 
 		if (!series.surface_group) {
 			series.surface_group = renderer.g().add(series.group);
@@ -283,8 +289,9 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		}
 
 		var group = series.surface_group;
-		var egde_count = {};
 		var triangle_count = 0;
+
+		var egde_count = show_edges ? {} : null;
 		var appendEdge = function(a,b) {
 			egde_count[a+'-'+b] = (egde_count[a+'-'+b] || 0) + 1;
 		};
@@ -305,9 +312,11 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			triangle_data.b = b;
 			triangle_data.c = c;
 
-			appendEdge(a,b);
-			appendEdge(b,c);
-			appendEdge(c,a);
+			if (show_edges) {
+				appendEdge(a,b);
+				appendEdge(b,c);
+				appendEdge(c,a);
+			}
 
 			triangle_data.z_order = [(points[a].plotZ + points[b].plotZ + points[c].plotZ)/3];
 		};
@@ -334,7 +343,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			var triangles = Delaunay.triangulate(points.map(
 				this.is3d ?
 				function(x) {
-					return [x.plotXold, x.plotYold];
+					return [x.plotXold, x.plotZold];
 				} : function(x) {
 					return [x.plotX, x.plotY];
 				}));
