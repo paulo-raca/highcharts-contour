@@ -408,42 +408,59 @@ function Matrix(ary) {
 
 // http://rosettacode.org/wiki/Reduced_row_echelon_form#JavaScript
 Matrix.prototype.toReducedRowEchelonForm = function() {
-	var lead = 0, i, j;
-	for (var r = 0; r < this.height; r++) {
-		if (this.width <= lead) {
-			return;
-		}
-		i = r;
-		while (this.mtx[i][lead] === 0) {
-			i++;
-			if (this.height == i) {
-				i = r;
-				lead++;
-				if (this.width == lead) {
-					return;
-				}
+	for (var col=0; col<this.width && col<this.height; col++) {
+		var bestRow = null;
+		var bestRowVal = 0;
+		for (var row=col; row<this.height; row++) {
+			if (Math.abs(this.mtx[row][col]) > bestRowVal) {
+				bestRow = row;
+				bestRowVal = Math.abs(this.mtx[row][col]);
 			}
 		}
 
-		var tmp = this.mtx[i];
-		this.mtx[i] = this.mtx[r];
-		this.mtx[r] = tmp;
-
-		var val = this.mtx[r][lead];
-		for (j = 0; j < this.width; j++) {
-			this.mtx[r][j] /= val;
+		//All zeros in this column :(
+		if (bestRow == null) {
+			for (var row=0; row<this.height; row++) {
+				this.mtx[row][col] = 0;
+			}
+			continue;
 		}
 
-		for (i = 0; i < this.height; i++) {
-			if (i == r) continue;
-			val = this.mtx[i][lead];
-			for (j = 0; j < this.width; j++) {
-				this.mtx[i][j] -= val * this.mtx[r][j];
+		//Swap rows
+		a = this.mtx[col];
+		this.mtx[col] = this.mtx[bestRow];
+		this.mtx[bestRow] = a;
+
+		//Normalize
+		for (var row=0; row<this.height; row++) {
+			if (row == col) { //Normalize reference row last, for numeric stability
+				continue;
+			}
+			var k = this.mtx[row][col] / this.mtx[col][col];
+			for (var i=col; i<this.width; i++) {
+				this.mtx[row][i] -= k * this.mtx[col][i];
 			}
 		}
-		lead++;
+
+		//Normalize reference row now
+		var k = this.mtx[col][col];
+		for (var i=col; i<this.width; i++) {
+			this.mtx[col][i] /= k;
+		}
+
+		//Normalize this column for numeric stability
+		for (var row=0; row<this.height; row++) {
+			this.mtx[row][col] = row == col ? 1 : 0;
+		}
 	}
 	return this;
+};
+
+Matrix.prototype.toString = function () {
+	var s = [];
+	for (var i = 0; i < this.mtx.length; i++)
+	s.push(this.mtx[i].join(","));
+	return s.join("\n");
 };
 
 }(Highcharts));
