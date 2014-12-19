@@ -9,6 +9,8 @@
 /*global HighchartsAdapter*/
 (function (Highcharts) {
 
+"use strict";
+
 
 var defaultOptions = Highcharts.getOptions(),
 	each = Highcharts.each,
@@ -18,7 +20,7 @@ var defaultOptions = Highcharts.getOptions(),
 	wrap = Highcharts.wrap,
 	perspective = Highcharts.perspective,
 	eps = 0.0001,
-	SVG_NS = "http://www.w3.org/2000/svg";
+	SVG_NS = "http://www.w3.org/2000/svg",
 	XLINK_NS = "http://www.w3.org/1999/xlink",
 	gradient_id = 0;
 
@@ -427,9 +429,9 @@ Matrix.prototype.toReducedRowEchelonForm = function() {
 		}
 
 		//Swap rows
-		a = this.mtx[col];
+		var tmp = this.mtx[col];
 		this.mtx[col] = this.mtx[bestRow];
-		this.mtx[bestRow] = a;
+		this.mtx[bestRow] = tmp;
 
 		//Normalize
 		for (var row=0; row<this.height; row++) {
