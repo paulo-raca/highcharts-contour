@@ -50,6 +50,7 @@ Highcharts.Axis.prototype.drawCrosshair = function() {};
 seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 	type: 'contour',
 	axisTypes: ['xAxis', 'yAxis', 'colorAxis'],
+	optionalAxis: 'zAxis',
 	parallelArrays: ['x', 'y', 'z', 'value'],
 	colorKey: 'value',
 	hasPointSpecificOptions: true,
@@ -81,8 +82,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			chart = series.chart,
 			options3d = series.chart.options.chart.options3d,
 			depth = options3d.depth,
-			zMin = (chart.options.zAxis && chart.options.zAxis.min != null) ? chart.options.zAxis.min : this.zMin,
-			zMax = (chart.options.zAxis && chart.options.zAxis.max != null) ? chart.options.zAxis.max : this.zMax,
+			zMin = chart.zAxis[0].min,
+			zMax = chart.zAxis[0].max,
 			rangeModifier = depth / (zMax - zMin);
 
 		Highcharts.each(series.data, function (point) {
