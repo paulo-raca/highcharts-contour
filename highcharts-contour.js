@@ -167,10 +167,10 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 				var gradient = triangle_data.gradient;
 				if (!gradient) {
 					var gradient = triangle_data.gradient = document.createElementNS(SVG_NS, "linearGradient");
-					gradient.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
 					gradient.setAttribute("id", "contour-gradient-id-" + (gradient_id++));
 					renderer.defs.element.appendChild(gradient);
 				}
+				gradient.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
 				gradient.setAttribute("x1", x1);
 				gradient.setAttribute("y1", y1);
 				gradient.setAttribute("x2", x2);
