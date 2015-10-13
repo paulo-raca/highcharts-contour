@@ -24,7 +24,7 @@ This is the same demo you can find at http://www.highcharts.com/maps/demo/heatma
 This demo uses a regular grid to plot a saddle point. The color axis is split is several constant-color ranges, creating contour lines.
 
 
-[3-D demo](http://jsfiddle.net/y80jchon/)
+[3-D demo](http://jsfiddle.net/yw56rtus/)
 --------------------
 This demo demonstrates how to use this plugin to display 3-D contour curves
 
