@@ -134,7 +134,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		//All vertexes have the same value/color
 		if (Math.abs(values[0] - values[1]) < eps && Math.abs(values[0] - values[2]) < eps) {
-			fill = this.colorAxis.toColor((values[0]+values[1]+values[2])/3);
+			fill = this.colorAxis.toColor((a[colorKey] + b[colorKey] + c[colorKey]) / 3);
 		//Use a linear gradient to interpolate values/colors
 		} else {
 			//Find function where "Value = A*X + B*Y + C" at the 3 vertexes
