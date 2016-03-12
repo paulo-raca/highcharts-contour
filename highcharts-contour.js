@@ -295,33 +295,38 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		var triangle_count = 0;
 
 		var egde_count = show_edges ? {} : null;
+		var validatePoint = function(p) {
+			return (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !this.is3d) && (typeof p[this.colorKey] === "number");
+		}.bind(this);
 		var appendEdge = function(a,b) {
 			egde_count[a+'-'+b] = (egde_count[a+'-'+b] || 0) + 1;
 		};
 		var appendTriangle = function(a,b,c) {
-			var triangle_data = series.triangles[triangle_count];
-			if (!triangle_data) {
-				triangle_data = series.triangles[triangle_count] = {};
-			}
-			triangle_count++;
+			if (validatePoint(points[a]) && validatePoint(points[b]) && validatePoint(points[c])) {
+				var triangle_data = series.triangles[triangle_count];
+				if (!triangle_data) {
+					triangle_data = series.triangles[triangle_count] = {};
+				}
+				triangle_count++;
 
-			//Make sure the shape is counter-clockwise
-			if (shapeArea([points[a], points[b], points[c]], 'plotX', 'plotY') > 0) {
-				var tmp = a;
-				a = b;
-				b = tmp;
-			}
-			triangle_data.a = a;
-			triangle_data.b = b;
-			triangle_data.c = c;
+				//Make sure the shape is counter-clockwise
+				if (shapeArea([points[a], points[b], points[c]], 'plotX', 'plotY') > 0) {
+					var tmp = a;
+					a = b;
+					b = tmp;
+				}
+				triangle_data.a = a;
+				triangle_data.b = b;
+				triangle_data.c = c;
 
-			if (show_edges) {
-				appendEdge(a,b);
-				appendEdge(b,c);
-				appendEdge(c,a);
-			}
+				if (show_edges) {
+					appendEdge(a,b);
+					appendEdge(b,c);
+					appendEdge(c,a);
+				}
 
-			triangle_data.z_order = [(points[a].plotZ + points[b].plotZ + points[c].plotZ)/3];
+				triangle_data.z_order = [(points[a].plotZ + points[b].plotZ + points[c].plotZ)/3];
+			}
 		};
 
 
@@ -329,7 +334,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			var triangles = []
 			//points are in a nice regular grid
 			for (i=1; i<points.length/grid_width; i++) {
-				for (j=1; j<options.grid_width; j++) {
+				for (j=1; j<options.grid_width && (i*grid_width + j)<points.length; j++) {
 					appendTriangle(
 						( i )*grid_width + (j-1),
 						(i-1)*grid_width + (j-1),
@@ -343,6 +348,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		} else {
 			//If points are not in a regular grid, use Delaunay triangulation.
 			//You will have to include this: https://github.com/ironwallaby/delaunay
+			points = points.filter(validatePoint);
 			var triangles = Delaunay.triangulate(points.map(
 				this.is3d ?
 				function(x) {
