@@ -41,7 +41,7 @@ Highcharts.ColorAxis.prototype.toRelativePosition = function(value) {
 	if (this.isLog) {
 		value = this.val2lin(value);
 	}
-    return (value - this.min) / ((this.max - this.min) || 1);
+	return (value - this.min) / ((this.max - this.min) || 1);
 };
 
 Highcharts.Axis.prototype.drawCrosshair = function() {};
@@ -116,7 +116,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		// Get the extremes from the y data
 		Highcharts.Series.prototype.getExtremes.call(this);
 	},
-	drawTriangle: function (triangle_data, points, edgeCount) {
+	drawTriangle: function (triangle_data, points, edgeCount, showContours) {
 		var fill;
 		var chart = this.chart;
 		var colorKey = this.colorKey;
@@ -124,6 +124,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		var a = points[triangle_data.a];
 		var b = points[triangle_data.b];
 		var c = points[triangle_data.c];
+		var abc = [a,b,c];
 
 		//Normalized values of the vertexes
 		var values = [
@@ -219,8 +220,12 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		}
 		triangle_data.shape.add(this.surface_group);
 
+		
+		
+		// Draw edges around the triangle and/or on contour curves
+		
+		var edge_path = [];
 		if (edgeCount) {
-			var edge_path = [];
 			var processEdge = function(a,b) {
 				if (!edgeCount[b + '-' + a]) {
 					if (edgeCount[a + '-' + b]-- == 1) {
@@ -235,24 +240,53 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			processEdge(triangle_data.a,triangle_data.b);
 			processEdge(triangle_data.b,triangle_data.c);
 			processEdge(triangle_data.c,triangle_data.a);
-			if (edge_path.length) {
-				if (triangle_data.edge) {
-					triangle_data.edge.attr({
-						d: edge_path,
-					});
-				} else {
-					triangle_data.edge = renderer.path(edge_path)
-						.attr({
-							'stroke-linecap': 'round',
-							'stroke': 'black',
-							'stroke-width': 2,
-						})
+		}
+		
+		if (showContours) {
+			var contourAxis = this.is3d ? this.yAxis : this.colorAxis;
+			var contourAttr = this.is3d ? "y" : "value";
+			//TODO: Think carefully about corner conditions and preventing duplicated line segments
+			for (var tickIndex in contourAxis.tickPositions) {
+				var tickValue = contourAxis.tickPositions[tickIndex];
+				var contourVertexes=[];
+				for (var i=0; i<3; i++) {
+					var x1 = abc[ i     ].plotX, y1 = abc[ i     ].plotY, v1=abc[ i     ][contourAttr];
+					var x2 = abc[(i+1)%3].plotX, y2 = abc[(i+1)%3].plotY, v2=abc[(i+1)%3][contourAttr];
+					if (v1 != v2 && tickValue >= Math.min(v1, v2) && tickValue < Math.max(v1, v2)) {
+						var q = (tickValue-v1)/(v2-v1);
+						contourVertexes.push([
+							q*(x2-x1) + x1,
+							q*(y2-y1) + y1
+						]);
+					}
 				}
-				triangle_data.edge.add(this.surface_group);
-			} else if (triangle_data.edge) {
-				triangle_data.edge.destroy();
-				triangle_data.edge = null;
+				if (contourVertexes.length == 2) {
+					edge_path.push(
+						'M',
+						contourVertexes[0][0] + ',' + contourVertexes[0][1],
+						'L',
+						contourVertexes[1][0] + ',' + contourVertexes[1][1]);
+				}
 			}
+		}
+		
+		if (edge_path.length) {
+			if (triangle_data.edge) {
+				triangle_data.edge.attr({
+					d: edge_path,
+				});
+			} else {
+				triangle_data.edge = renderer.path(edge_path)
+					.attr({
+						'stroke-linecap': 'round',
+						'stroke': 'black',
+						'stroke-width': 1,
+					})
+			}
+			triangle_data.edge.add(this.surface_group);
+		} else if (triangle_data.edge) {
+			triangle_data.edge.destroy();
+			triangle_data.edge = null;
 		}
 	},
 	drawGraph: function () {
@@ -262,7 +296,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			options = this.options,
 			renderer = series.chart.renderer,
 			grid_width = options.grid_width,
-			show_edges = options.showEdges;
+			show_edges = options.showEdges,
+			show_contours = options.showContours;
 
 		if (!series.surface_group) {
 			series.surface_group = renderer.g().add(series.group);
@@ -390,7 +425,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		// Render each triangle
 		for (i=0; i<triangle_count; i++) {
-			series.drawTriangle(series.triangles[i], points, egde_count);
+			series.drawTriangle(series.triangles[i], points, egde_count, show_contours);
 		}
 	}
 });
