@@ -18,6 +18,10 @@ Demos
 
 This is the same demo you can find at http://www.highcharts.com/maps/demo/heatmap, but chart type was changed to 'contour'. Note that it automatically used Delaunay for triangulation, so that you didn't need any extra effort ;)
 
+[Basic heatmap demo with contour lines](http://jsfiddle.net/acyfjeg8/)
+--------------------
+
+Same as the previous one, but showing contour lines
 
 [Countour curve](http://jsfiddle.net/1peapgLw/)
 ------------------------
@@ -27,6 +31,13 @@ This demo uses a regular grid to plot a saddle point. The color axis is split is
 [3-D demo](http://jsfiddle.net/yw56rtus/)
 --------------------
 This demo demonstrates how to use this plugin to display 3-D contour curves
+
+Note that this relies on changes that are not in the main Highcharts distribution yet.
+
+
+[3-D demo with contour lines](http://jsfiddle.net/bgxd3tgr/)
+--------------------
+Same as the previous one, but showing contour lines
 
 Note that this relies on changes that are not in the main Highcharts distribution yet.
 
