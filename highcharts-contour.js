@@ -49,13 +49,11 @@ Highcharts.Axis.prototype.drawCrosshair = function() {};
 // The Heatmap series type
 seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 	type: 'contour',
-	axisTypes: ['xAxis', 'yAxis', 'colorAxis'],
-	optionalAxis: 'zAxis',
-	parallelArrays: ['x', 'y', 'z', 'value'],
 	colorKey: 'value',
 	hasPointSpecificOptions: true,
 	getSymbol: seriesTypes.scatter.prototype.getSymbol,
 	drawPoints: Highcharts.Series.prototype.drawPoints,
+
 	init: function () {
 		seriesTypes.heatmap.prototype.init.apply(this, arguments);
 
@@ -71,6 +69,18 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			return false;
 		};
 	},
+	
+	bindAxes: function () {
+		if (this.chart.is3d()) {
+			this.axisTypes = ['xAxis', 'yAxis', 'zAxis', 'colorAxis'];
+			this.parallelArrays = ['x', 'y', 'z', 'value'];
+		} else {
+			this.axisTypes = ['xAxis', 'yAxis', 'colorAxis'];
+			this.parallelArrays = ['x', 'y', 'value'];
+		}
+		seriesTypes.heatmap.prototype.bindAxes.apply(this, arguments);
+	},
+	
 	translate: function () {
 		seriesTypes.heatmap.prototype.translate.apply(this, arguments);
 
@@ -187,10 +197,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 						spreadMethod: 'pad',
 						gradientUnits:'userSpaceOnUse'
 					},
-					stops: this.colorAxis.options.stops || [
-						[0, this.colorAxis.options.minColor],
-						[1, this.colorAxis.options.maxColor]
-					]
+					stops: this.colorAxis.stops
 				};
 			}
 		}
@@ -317,10 +324,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 						spreadMethod: 'pad',
 						gradientUnits:'userSpaceOnUse'
 					},
-					stops: this.colorAxis.options.stops || [
-						[0, this.colorAxis.options.minColor],
-						[1, this.colorAxis.options.maxColor]
-					]
+					stops: this.colorAxis.stops
 				}
 			});
 			this.base_gradient_id = /(#.*)[)]/.exec(fake_rect.attr('fill'))[1];
