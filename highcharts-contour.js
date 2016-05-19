@@ -31,7 +31,6 @@ var defaultOptions = Highcharts.getOptions(),
 
 defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.heatmap, {
 	marker: defaultOptions.plotOptions.scatter.marker,
-	//state: defaultOptions.plotOptions.scatter.states,
 });
 
 /**
@@ -54,24 +53,13 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 	getSymbol: seriesTypes.scatter.prototype.getSymbol,
 	drawPoints: Highcharts.Series.prototype.drawPoints,
 
-	init: function () {
-		seriesTypes.heatmap.prototype.init.apply(this, arguments);
-
-		//We don't want "padding" between our data points and the margin
-		this.pointRange = 0;
-		this.is3d = this.chart.is3d && this.chart.is3d();
-		this.xAxis.axisPointRange = 0;
-		this.yAxis.axisPointRange = 0;
-
-		//FIXME: I have no idea why, but it believes my chart is always hidden!
-		//This causes a _HUGE_ slowdown while the whole thing is copied over on chart.cloneRenderTo()
-		this.chart.renderer.isHidden = function() {
-			return false;
-		};
+	init: function (chart) {
+		this.is3d = chart.is3d && chart.is3d();
+		seriesTypes.scatter.prototype.init.apply(this, arguments);
 	},
 	
 	bindAxes: function () {
-		if (this.chart.is3d()) {
+		if (this.is3d) {
 			this.axisTypes = ['xAxis', 'yAxis', 'zAxis', 'colorAxis'];
 			this.parallelArrays = ['x', 'y', 'z', 'value'];
 		} else {
@@ -90,17 +78,13 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		var series = this,
 			chart = series.chart,
-			options3d = series.chart.options.chart.options3d,
-			depth = options3d.depth,
-			zMin = chart.zAxis[0].min,
-			zMax = chart.zAxis[0].max,
-			rangeModifier = depth / (zMax - zMin);
+			zAxis = series.zAxis;
 
 		Highcharts.each(series.data, function (point) {
 			var p3d = {
 				x: point.plotX,
 				y: point.plotY,
-				z: (point.z - zMin) * rangeModifier
+				z: zAxis.translate(zAxis.isLog && zAxis.val2lin ? zAxis.val2lin(point.z) : point.z)
 			};
 			point.plotXold = p3d.x;
 			point.plotYold = p3d.y;
@@ -111,22 +95,9 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			point.plotY = p3d.y;
 			point.plotZ = p3d.z;
 		});
-		series.kdTree = null;
 	},
-	getExtremes: function () {
-		// Get the extremes from the value data
-		Highcharts.Series.prototype.getExtremes.call(this, this.valueData);
-		this.valueMin = this.dataMin;
-		this.valueMax = this.dataMax;
-
-		Highcharts.Series.prototype.getExtremes.call(this, this.zData);
-		this.zMin = this.dataMin;
-		this.zMax = this.dataMax;
-
-		// Get the extremes from the y data
-		Highcharts.Series.prototype.getExtremes.call(this);
-	},
-	drawTriangle: function (triangle_data, points, edgeCount, showContours) {
+	
+	drawTriangle: function (triangle_data, points, edgeCount, show_edges, show_contours) {
 		var fill;
 		var chart = this.chart;
 		var colorKey = this.colorKey;
@@ -232,7 +203,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		// Draw edges around the triangle and/or on contour curves
 		
 		var edge_path = [];
-		if (edgeCount) {
+		if (show_edges) {
 			var processEdge = function(a,b) {
 				if (!edgeCount[b + '-' + a]) {
 					if (edgeCount[a + '-' + b]-- == 1) {
@@ -249,7 +220,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			processEdge(triangle_data.c,triangle_data.a);
 		}
 		
-		if (showContours) {
+		if (show_contours) {
 			var contourAxis = this.is3d ? this.yAxis : this.colorAxis;
 			var contourAttr = this.is3d ? "y" : "value";
 			//TODO: Think carefully about corner conditions and preventing duplicated line segments
@@ -293,7 +264,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			triangle_data.edge.add(this.surface_group);
 		} else if (triangle_data.edge) {
 			triangle_data.edge.destroy();
-			triangle_data.edge = null;
+			delete triangle_data.edge;
 		}
 	},
 	drawGraph: function () {
@@ -333,7 +304,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		var group = series.surface_group;
 		var triangle_count = 0;
 
-		var egde_count = show_edges ? {} : null;
+		var egde_count = {};
 		var validatePoint = function(p) {
 			return (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !this.is3d) && (typeof p[this.colorKey] === "number");
 		}.bind(this);
@@ -358,11 +329,9 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 				triangle_data.b = b;
 				triangle_data.c = c;
 
-				if (show_edges) {
-					appendEdge(a,b);
-					appendEdge(b,c);
-					appendEdge(c,a);
-				}
+				appendEdge(a,b);
+				appendEdge(b,c);
+				appendEdge(c,a);
 
 				triangle_data.z_order = [(points[a].plotZ + points[b].plotZ + points[c].plotZ)/3];
 			}
@@ -429,7 +398,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		// Render each triangle
 		for (i=0; i<triangle_count; i++) {
-			series.drawTriangle(series.triangles[i], points, egde_count, show_contours);
+			series.drawTriangle(series.triangles[i], points, egde_count, show_edges, show_contours);
 		}
 	}
 });
