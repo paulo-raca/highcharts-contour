@@ -312,7 +312,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		var egde_count = {};
 		var validatePoint = function(p) {
-			return (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !this.is3d) && (typeof p[this.colorKey] === "number");
+			return p && (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !this.is3d) && (typeof p[this.colorKey] === "number");
 		}.bind(this);
 		var appendEdge = function(a,b) {
 			egde_count[a+'-'+b] = (egde_count[a+'-'+b] || 0) + 1;
@@ -346,11 +346,11 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		var triangles = [];
 		if (options.triangles) {
-			for (i=1; i<options.triangles.length; i++) {
+			for (i=0; i<options.triangles.length; i++) {
 				var v = options.triangles[i];
 				if (typeof v === "number") {
 					triangles.push(v);
-				} else if (v.length===3 && typeof v[0] === "number" && typeof v[1] === "number" && typeof v[2] === "number") {
+				} else if (typeof v === "object" && typeof v[0] === "number" && typeof v[1] === "number" && typeof v[2] === "number") {
 					triangles.push(v[0], v[1],  v[2]);
 				}
 			}
