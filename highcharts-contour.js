@@ -97,7 +97,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		});
 	},
 	
-	drawTriangle: function (triangle_data, points, edgeCount, show_edges, show_contours) {
+	drawTriangle: function (triangle_data, points, edgeCount, show_edges, contours) {
 		var fill;
 		var chart = this.chart;
 		var colorKey = this.colorKey;
@@ -220,9 +220,9 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			processEdge(triangle_data.c,triangle_data.a);
 		}
 		
-		if (show_contours) {
-			var contourAxis = this.is3d ? this.yAxis : this.colorAxis;
-			var contourAttr = this.is3d ? "y" : "value";
+		for (var contour_index=0; contour_index<contours.length; contour_index++) {
+			var contourAxis = contours[contour_index].axis;
+			var contourAttr = contours[contour_index].attr;
 			//TODO: Think carefully about corner conditions and preventing duplicated line segments
 			for (var tickIndex in contourAxis.tickPositions) {
 				var tickValue = contourAxis.tickPositions[tickIndex];
@@ -273,7 +273,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			points = series.points,
 			options = this.options,
 			renderer = series.chart.renderer;
-
+			
 		if (!series.surface_group) {
 			series.surface_group = renderer.g().add(series.group);
 			series.triangles = [];
@@ -405,9 +405,27 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			return 0;
 		});
 
+		
+		var contours = [];
+		if (options.contours) {
+			Highcharts.each(options.contours, function(contourName) {
+				switch (contourName) {
+					case "x":    contours.push({axis: series.xAxis,     attr: "x"}); break;
+					case "y":    contours.push({axis: series.yAxis,     attr: "y"}); break;
+					case "z":    contours.push({axis: series.zAxis,     attr: "z"}); break;
+					case "value":contours.push({axis: series.colorAxis, attr: "value"}); break;
+				};
+				debugger;
+			});
+		} else if (options.showContours) {
+			contours = this.is3d
+					? [{axis: series.yAxis,     attr: "y"}]
+					: [{axis: series.colorAxis, attr: "value"}];
+		}
+				
 		// Render each triangle
 		for (i=0; i<triangle_count; i++) {
-			series.drawTriangle(series.triangles[i], points, egde_count, options.showEdges, options.showEdges);
+			series.drawTriangle(series.triangles[i], points, egde_count, options.showEdges, contours);
 		}
 	}
 });
