@@ -43,6 +43,15 @@ Highcharts.ColorAxis.prototype.toRelativePosition = function(value) {
 	return (value - this.min) / ((this.max - this.min) || 1);
 };
 
+wrap(Highcharts.ColorAxis.prototype, 'setAxisSize', function (proceed) {
+	if (this.legendSymbol) {
+		proceed.call(this);
+	} else {
+		this.len = 100;
+		this.pos = 0;
+	}
+});
+
 Highcharts.Axis.prototype.drawCrosshair = function() {};
 
 // The Heatmap series type
@@ -415,7 +424,6 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 					case "z":    contours.push({axis: series.zAxis,     attr: "z"}); break;
 					case "value":contours.push({axis: series.colorAxis, attr: "value"}); break;
 				};
-				debugger;
 			});
 		} else if (options.showContours) {
 			contours = this.is3d
