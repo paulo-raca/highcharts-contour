@@ -272,10 +272,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			i,j,
 			points = series.points,
 			options = this.options,
-			renderer = series.chart.renderer,
-			grid_width = options.grid_width,
-			show_edges = options.showEdges,
-			show_contours = options.showContours;
+			renderer = series.chart.renderer;
 
 		if (!series.surface_group) {
 			series.surface_group = renderer.g().add(series.group);
@@ -284,8 +281,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		//When creating a SVG, we create a "base" gradient with the right colors,
 		//And extend it on every triangle to define the orientation.
-		if (renderer.isSVG) {
-			var fake_rect = renderer.rect(0,0,1,1).attr({
+		if (series.chart.renderer.isSVG && !this.base_gradient_id) {
+			var fake_rect = series.chart.renderer.rect(0,0,1,1).attr({
 				fill: {
 					linearGradient: {
 						x1: 0,
@@ -338,16 +335,27 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		};
 
 
-		if (grid_width) {
-			var triangles = []
+		var triangles = [];
+		if (options.triangles) {
+			for (i=1; i<options.triangles.length; i++) {
+				var v = options.triangles[i];
+				if (typeof v === "number") {
+					triangles.push(v);
+				} else if (v.length===3 && typeof v[0] === "number" && typeof v[1] === "number" && typeof v[2] === "number") {
+					triangles.push(v[0], v[1],  v[2]);
+				}
+			}
+			
+		} else if (options.grid_width) {
 			//points are in a nice regular grid
+			var grid_width = options.grid_width;
 			for (i=1; i<points.length/grid_width; i++) {
 				for (j=1; j<options.grid_width && (i*grid_width + j)<points.length; j++) {
-					appendTriangle(
+					triangles.push(
 						( i )*grid_width + (j-1),
 						(i-1)*grid_width + (j-1),
 						(i-1)*grid_width + ( j ));
-					appendTriangle(
+					triangles.push(
 						( i )*grid_width + ( j ),
 						( i )*grid_width + (j-1),
 						(i-1)*grid_width + ( j ));
@@ -357,19 +365,20 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 			//If points are not in a regular grid, use Delaunay triangulation.
 			//You will have to include this: https://github.com/ironwallaby/delaunay
 			points = points.filter(validatePoint);
-			var triangles = Delaunay.triangulate(points.map(
+			triangles = Delaunay.triangulate(points.map(
 				this.is3d ?
 				function(x) {
 					return [x.plotXold, x.plotZold];
 				} : function(x) {
 					return [x.plotX, x.plotY];
 				}));
-			for (i=0; i<triangles.length; i+=3) {
-				appendTriangle(
-					triangles[i],
-					triangles[i+1],
-					triangles[i+2]);
-			}
+		}
+		
+		for (i=0; i<triangles.length-2; i+=3) {
+			appendTriangle(
+				triangles[i],
+				triangles[i+1],
+				triangles[i+2]);
 		}
 
 		// Remove extra unused triangles from previous rendering
@@ -398,7 +407,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 		// Render each triangle
 		for (i=0; i<triangle_count; i++) {
-			series.drawTriangle(series.triangles[i], points, egde_count, show_edges, show_contours);
+			series.drawTriangle(series.triangles[i], points, egde_count, options.showEdges, options.showEdges);
 		}
 	}
 });
