@@ -51,3 +51,7 @@ You can create a good chart even when you cannot sample your data in a rectangul
 [Random Data demo](http://jsfiddle.net/mqxmraL2/)
 --------------------
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
+
+[Utah Teapot](http://jsfiddle.net/13x2mbz8/)
+--------------------
+This whole thing is meant to draw surfaces in 3-D. Why not the Utah Teapot?!
