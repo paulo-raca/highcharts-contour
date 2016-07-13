@@ -1,12 +1,9 @@
 /**
-* @license @product.name@ JS v@product.version@ (@product.date@)
-*
-* (c) 2011-2014 Torstein Honsi
-*
-* License: www.highcharts.com/license
-*/
+ * Highcharts plugin for contour curves
+ *
+ * Author: Paulo Costa
+ */
 
-/*global HighchartsAdapter*/
 (function (Highcharts) {
 
 "use strict";
@@ -354,20 +351,24 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 					triangles.push(v[0], v[1],  v[2]);
 				}
 			}
-			
+
 		} else if (options.grid_width) {
 			//points are in a nice regular grid
 			var grid_width = options.grid_width;
 			for (i=1; i<points.length/grid_width; i++) {
 				for (j=1; j<options.grid_width && (i*grid_width + j)<points.length; j++) {
-					triangles.push(
-						( i )*grid_width + (j-1),
-						(i-1)*grid_width + (j-1),
-						(i-1)*grid_width + ( j ));
-					triangles.push(
-						( i )*grid_width + ( j ),
-						( i )*grid_width + (j-1),
-						(i-1)*grid_width + ( j ));
+					var i00 = (i-1)*grid_width + (j-1);
+					var i01 = (i-1)*grid_width + ( j );
+					var i10 = ( i )*grid_width + (j-1);
+					var i11 = ( i )*grid_width + ( j );
+
+					if (Math.abs(points[i00][this.colorKey] - points[i11][this.colorKey]) < Math.abs(points[i01][this.colorKey] - points[i10][this.colorKey])) {
+						triangles.push(i00, i01, i11);
+						triangles.push(i00, i11, i10);
+					} else {
+						triangles.push(i00, i01, i10);
+						triangles.push(i01, i10, i11);
+					}
 				}
 			}
 		} else {
