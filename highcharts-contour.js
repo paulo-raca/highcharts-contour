@@ -54,7 +54,6 @@ Highcharts.Axis.prototype.drawCrosshair = function() {};
 // The Heatmap series type
 seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     type: 'contour',
-    colorKey: 'value',
     hasPointSpecificOptions: true,
     getSymbol: seriesTypes.scatter.prototype.getSymbol,
     drawPoints: Highcharts.Series.prototype.drawPoints,
@@ -106,7 +105,6 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     drawTriangle: function (triangle_data, points, edgeCount, show_edges, contours) {
         var fill;
         var chart = this.chart;
-        var colorKey = this.colorKey;
         var renderer = this.chart.renderer;
         var a = points[triangle_data.a];
         var b = points[triangle_data.b];
@@ -115,14 +113,14 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
         //Normalized values of the vertexes
         var values = [
-            this.colorAxis.toRelativePosition(a[colorKey]),
-            this.colorAxis.toRelativePosition(b[colorKey]),
-            this.colorAxis.toRelativePosition(c[colorKey])
+            this.colorAxis.toRelativePosition(a.value),
+            this.colorAxis.toRelativePosition(b.value),
+            this.colorAxis.toRelativePosition(c.value)
         ];
 
         //All vertexes have the same value/color
         if (Math.abs(values[0] - values[1]) < eps && Math.abs(values[0] - values[2]) < eps) {
-            fill = this.colorAxis.toColor((a[colorKey] + b[colorKey] + c[colorKey]) / 3);
+            fill = this.colorAxis.toColor((a.value + b.value + c.value) / 3);
         //Use a linear gradient to interpolate values/colors
         } else {
             //Find function where "Value = A*X + B*Y + C" at the 3 vertexes
@@ -309,7 +307,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
         var egde_count = {};
         var validatePoint = function(p) {
-            return p && (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !this.is3d) && (typeof p[this.colorKey] === "number");
+            return p && (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !this.is3d) && (typeof p.value === "number");
         }.bind(this);
         var appendEdge = function(a,b) {
             egde_count[a+'-'+b] = (egde_count[a+'-'+b] || 0) + 1;
@@ -362,7 +360,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                     var i10 = ( i )*grid_width + (j-1);
                     var i11 = ( i )*grid_width + ( j );
 
-                    if (Math.abs(points[i00][this.colorKey] - points[i11][this.colorKey]) < Math.abs(points[i01][this.colorKey] - points[i10][this.colorKey])) {
+                    if (Math.abs(points[i00].value - points[i11].value) < Math.abs(points[i01].value - points[i10].value)) {
                         triangles.push(i00, i01, i11);
                         triangles.push(i00, i11, i10);
                     } else {
