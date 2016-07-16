@@ -440,6 +440,23 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     }
 });
 
+
+//FIXME: Temporary fix for drawing ColorAxis legend on 3-D charts
+//Once https://github.com/highcharts/highcharts/pull/5498 has landed, this whole method can go away
+Highcharts.ColorAxis.prototype.render = function () {
+    // ColorAxis should never be drawn in 3D, therefore the
+    // 3D flag is temporarialy disabled while it is rendered in the legend
+    var is3d = this.chart.is3d && this.chart.is3d();
+    if (is3d) {
+        this.chart.options.chart.options3d.enabled = false;
+    }
+    Highcharts.Axis.prototype.render.call(this, arguments);
+    if (is3d) {
+        this.chart.options.chart.options3d.enabled = true;
+    }
+};
+
+
 //Shoelace algorithm -- http://en.wikipedia.org/wiki/Shoelace_formula
 
 function shapeArea(vertexes, xProperty, yProperty) {
