@@ -71,15 +71,18 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
             this.axisTypes = ['xAxis', 'yAxis', 'colorAxis'];
             this.parallelArrays = ['x', 'y', 'value'];
         }
-        seriesTypes.heatmap.prototype.bindAxes.apply(this, arguments);
+        seriesTypes.scatter.prototype.bindAxes.apply(this, arguments);
     },
-    
-    translate: function () {
-        seriesTypes.heatmap.prototype.translate.apply(this, arguments);
 
+    //FIXME: Once https://github.com/highcharts/highcharts/pull/5497 has landed, this whole method can go away
+    translate: function () {
         if (!this.is3d) {
+            seriesTypes.scatter.prototype.translate.apply(this, arguments);
             return;
         }
+        this.chart.options.chart.options3d.enabled = false;
+        seriesTypes.scatter.prototype.translate.apply(this, arguments);
+        this.chart.options.chart.options3d.enabled = true;
 
         var series = this,
             chart = series.chart,
