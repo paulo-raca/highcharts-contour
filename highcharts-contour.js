@@ -28,6 +28,7 @@ var defaultOptions = Highcharts.getOptions(),
 
 defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.heatmap, {
     marker: defaultOptions.plotOptions.scatter.marker,
+    turboThreshold:0
 });
 
 /**
