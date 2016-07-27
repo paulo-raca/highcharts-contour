@@ -13,15 +13,19 @@ Triangulation is performed either on a regular grid (Every 'grid_width' vertexes
 Demos
 =====
 
-[Basic heatmap demo](http://jsfiddle.net/nsj5uzdw/)
+[Basic heatmap demo](http://jsfiddle.net/paulo_raca/72kc0cjf/)
 --------------------
 
-This is the same demo you can find at http://www.highcharts.com/maps/demo/heatmap, but chart type was changed to 'contour'. Note that it automatically used Delaunay for triangulation, so that you didn't need any extra effort ;)
+This is the same demo you can find at Highcharts Heatmap Demo, but chart type was changed to 'contour'.
 
-[Basic heatmap demo with contour lines](http://jsfiddle.net/acyfjeg8/)
+Note that it automatically uses Delaunay for triangulation, no extra effort required ;)
+
+
+[Basic heatmap demo with contour lines](http://jsfiddle.net/paulo_raca/fmmc0be2/)
 --------------------
 
-Same as the previous one, but showing contour lines
+This charts is based on the Heatmap Demo, but you can toggle contour lines on each axis.
+
 
 [Countour curve](http://jsfiddle.net/1peapgLw/)
 ------------------------
@@ -45,6 +49,7 @@ Note that this relies on changes that are not in the main Highcharts distributio
 [Random Point locations](http://jsfiddle.net/f7ofc3q3/)
 ------------------------
 This demo plots a radial function, but the locations of the data points are spread randomly.
+
 You can create a good chart even when you cannot sample your data in a rectangular grid
 
 
@@ -52,6 +57,7 @@ You can create a good chart even when you cannot sample your data in a rectangul
 --------------------
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
 
-[Utah Teapot](http://jsfiddle.net/13x2mbz8/)
+
+[Utah Teapot / OBJ Reader](http://jsfiddle.net/paulo_raca/qy7a8evj/)
 --------------------
-This whole thing is meant to draw surfaces in 3-D. Why not the Utah Teapot?!
+Since this plugin can draw surfaces in 3D, why not use it to render the Utah Teapot from an OBJ file?!
