@@ -310,8 +310,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
         var egde_count = {};
         var validatePoint = function(p) {
-            return p && (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !this.is3d) && (typeof p.value === "number");
-        }.bind(this);
+            return p && (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !series.is3d) && (typeof p.value === "number");
+        };
         var appendEdge = function(a,b) {
             egde_count[a+'-'+b] = (egde_count[a+'-'+b] || 0) + 1;
         };
