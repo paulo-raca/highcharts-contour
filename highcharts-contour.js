@@ -104,6 +104,11 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
             point.plotY = p3d.y;
             point.plotZ = p3d.z;
         });
+        
+        
+        // Set color of each point (#10) 
+        // This is a quick hack. It might be better to look into a better solution later
+        series.translateColors();
     },
     
     drawTriangle: function (triangle_data, points, edgeCount, show_edges, contours) {
