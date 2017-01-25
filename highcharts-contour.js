@@ -77,6 +77,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     hasPointSpecificOptions: true,
     getSymbol: seriesTypes.scatter.prototype.getSymbol,
     drawPoints: Highcharts.Series.prototype.drawPoints,
+    pointClass: Highcharts.Point,
     pointAttribs: Highcharts.Series.prototype.pointAttribs,
 
     init: function (chart) {
