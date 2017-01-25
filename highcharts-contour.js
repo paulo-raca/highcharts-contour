@@ -25,10 +25,29 @@ var defaultOptions = Highcharts.getOptions(),
 * Extend the default options with map options
 */
 
-
-defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.heatmap, {
-    marker: defaultOptions.plotOptions.scatter.marker,
-    turboThreshold:0
+console.log(defaultOptions.plotOptions.scatter);
+defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.scatter, {
+    marker: {
+        radius: 0,
+        fillColor: '#ffffff',
+        states: {
+            hover: {
+                radius: defaultOptions.plotOptions.scatter.marker.radius,
+            },
+        },
+    },
+    states: {
+        hover: {
+            halo: {
+                size: defaultOptions.plotOptions.scatter.marker.radius + 4,
+                attributes: {
+                    fill: '#000000',
+                },
+                opacity: 0.5,
+            },
+        },
+    },
+    turboThreshold: 0,
 });
 
 /**
@@ -58,6 +77,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     hasPointSpecificOptions: true,
     getSymbol: seriesTypes.scatter.prototype.getSymbol,
     drawPoints: Highcharts.Series.prototype.drawPoints,
+    pointAttribs: Highcharts.Series.prototype.pointAttribs,
 
     init: function (chart) {
         this.is3d = chart.is3d && chart.is3d();
