@@ -111,13 +111,13 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         series.translateColors();
     },
     
-    drawTriangle: function (triangle_data, points, edgeCount, show_edges, contours) {
+    drawTriangle: function (triangle_data, edgeCount, show_edges, contours) {
         var fill;
         var chart = this.chart;
         var renderer = this.chart.renderer;
-        var a = points[triangle_data.a];
-        var b = points[triangle_data.b];
-        var c = points[triangle_data.c];
+        var a = triangle_data.A;
+        var b = triangle_data.B;
+        var c = triangle_data.C;
         var abc = [a,b,c];
 
         //Normalized values of the vertexes
@@ -208,6 +208,28 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                     'shape-rendering': 'crispEdges',
                     fill: fill
                 })
+            triangle_data.shape.on('mousemove', function(e) {
+                e = chart.pointer.normalize(e);
+                var mx = e.chartX - chart.plotLeft;
+                var my = e.chartY - chart.plotTop;
+                var dist = function(P) {
+                    return (P.plotX-mx)*(P.plotX-mx) + (P.plotY-my)*(P.plotY-my);
+                }
+                var nearest = triangle_data.A;
+                if (dist(triangle_data.B) < dist(nearest)) {
+                    nearest = triangle_data.B;
+                }
+                if (dist(triangle_data.C) < dist(nearest)) {
+                    nearest = triangle_data.C;
+                }
+                nearest.onMouseOver(e);
+            });
+//             triangle_data.shape.on('mouseout', function(e) {
+//                 triangle_data.A.onMouseOut();
+//                 triangle_data.B.onMouseOut();
+//                 triangle_data.C.onMouseOut();
+//                 console.log("=== MouseOut", chart.hoverPoint);
+//             });
         }
         triangle_data.shape.add(this.surface_group);
 
@@ -217,20 +239,20 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         
         var edge_path = [];
         if (show_edges) {
-            var processEdge = function(a,b) {
+            var processEdge = function(a,b,A,B) {
                 if (!edgeCount[b + '-' + a]) {
                     if (edgeCount[a + '-' + b]-- == 1) {
                         edge_path.push(
                             'M',
-                            points[a].plotX + ',' + points[a].plotY,
+                            A.plotX + ',' + A.plotY,
                             'L',
-                            points[b].plotX + ',' + points[b].plotY);
+                            B.plotX + ',' + B.plotY);
                     }
                 }
             }
-            processEdge(triangle_data.a,triangle_data.b);
-            processEdge(triangle_data.b,triangle_data.c);
-            processEdge(triangle_data.c,triangle_data.a);
+            processEdge(triangle_data.a, triangle_data.b, triangle_data.A, triangle_data.B);
+            processEdge(triangle_data.b, triangle_data.c, triangle_data.B, triangle_data.C);
+            processEdge(triangle_data.c, triangle_data.a, triangle_data.C, triangle_data.A);
         }
         
         for (var contour_index=0; contour_index<contours.length; contour_index++) {
@@ -339,6 +361,10 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                 triangle_data.b = b;
                 triangle_data.c = c;
 
+                triangle_data.A = points[a];
+                triangle_data.B = points[b];
+                triangle_data.C = points[c];
+
                 appendEdge(a,b);
                 appendEdge(b,c);
                 appendEdge(c,a);
@@ -441,7 +467,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                 
         // Render each triangle
         for (i=0; i<triangle_count; i++) {
-            series.drawTriangle(series.triangles[i], points, egde_count, options.showEdges, contours);
+            series.drawTriangle(series.triangles[i], egde_count, options.showEdges, contours);
         }
     }
 });
