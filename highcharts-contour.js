@@ -25,7 +25,6 @@ var defaultOptions = Highcharts.getOptions(),
 * Extend the default options with map options
 */
 
-console.log(defaultOptions.plotOptions.scatter);
 defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.scatter, {
     marker: {
         radius: 0,
