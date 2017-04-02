@@ -192,16 +192,25 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                 //SVGRenderer implementation of gradient is slow and leaks memory -- Lets do it ourselves
                 var gradient = triangle_data.gradient;
                 if (!gradient) {
-                    var gradient = triangle_data.gradient = document.createElementNS(SVG_NS, "linearGradient");
-                    gradient.setAttribute("id", "contour-gradient-id-" + (gradient_id++));
-                    renderer.defs.element.appendChild(gradient);
+                    gradient = triangle_data.gradient = renderer.createElement("linearGradient");
+                    gradient.add(renderer.defs);
+                    gradient.attr({
+                        id: "contour-gradient-id-" + (gradient_id++),
+                        x1: x1,
+                        y1: y1,
+                        x2: x2,
+                        y2: y2
+                    });
+                } else {
+                    gradient.animate({
+                        x1: x1,
+                        y1: y1,
+                        x2: x2,
+                        y2: y2
+                    });
                 }
-                gradient.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
-                gradient.setAttribute("x1", x1);
-                gradient.setAttribute("y1", y1);
-                gradient.setAttribute("x2", x2);
-                gradient.setAttribute("y2", y2);
-                fill = 'url(' + renderer.url + '#' + gradient.getAttribute('id') + ')';
+                gradient.element.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
+                fill = 'url(' + renderer.url + '#' + gradient.attr('id') + ')';
             } else {
                 fill = {
                     linearGradient: {
@@ -219,20 +228,20 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
 
         var path = [
-            'M',
-            a.plotX + ',' + a.plotY,
-            'L',
-            b.plotX + ',' + b.plotY,
-            'L',
-            c.plotX + ',' + c.plotY,
+            'M', a.plotX, a.plotY,
+            'L', b.plotX, b.plotY,
+            'L', c.plotX, c.plotY,
             'Z'
         ];
 
         if (triangle_data.shape) {
-            triangle_data.shape.attr({
-                d: path,
-                fill: fill,
-            });
+            triangle_data.shape
+                .animate({
+                    d: path,
+                })
+                .attr({
+                    fill: fill,
+                });
         } else {
             triangle_data.shape = renderer.path(path)
                 .attr({
@@ -268,10 +277,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                 if (!edgeCount[b + '-' + a]) {
                     if (edgeCount[a + '-' + b]-- == 1) {
                         edge_path.push(
-                            'M',
-                            A.plotX + ',' + A.plotY,
-                            'L',
-                            B.plotX + ',' + B.plotY);
+                            'M', A.plotX, A.plotY,
+                            'L', B.plotX, B.plotY);
                     }
                 }
             }
@@ -310,7 +317,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         
         if (edge_path.length) {
             if (triangle_data.edge) {
-                triangle_data.edge.attr({
+                triangle_data.edge.animate({
                     d: edge_path,
                 });
             } else {
