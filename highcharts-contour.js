@@ -81,6 +81,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
     init: function (chart) {
         this.is3d = chart.is3d && chart.is3d();
+        this.gradiend_ids = {};
         seriesTypes.scatter.prototype.init.apply(this, arguments);
     },
     
@@ -336,21 +337,30 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
         //When creating a SVG, we create a "base" gradient with the right colors,
         //And extend it on every triangle to define the orientation.
-        if (series.chart.renderer.isSVG && !this.base_gradient_id) {
-            var fake_rect = series.chart.renderer.rect(0,0,1,1).attr({
-                fill: {
-                    linearGradient: {
-                        x1: 0,
-                        y1: 0,
-                        x2: 1,
-                        y2: 0,
-                        spreadMethod: 'pad',
-                        gradientUnits:'userSpaceOnUse'
-                    },
-                    stops: this.colorAxis.stops
+        if (series.chart.renderer.isSVG) {
+            var gradiend_id = "";
+            for (var i=0; i<this.colorAxis.stops.length; i++) {
+                for (var j=0; j<this.colorAxis.stops[i].length; j++) {
+                    gradiend_id += ":" + this.colorAxis.stops[i][j];
                 }
-            });
-            this.base_gradient_id = /(#.*)[)]/.exec(fake_rect.attr('fill'))[1];
+            }
+            if (!this.gradiend_ids[gradiend_id]) {
+                var fake_rect = series.chart.renderer.rect(0,0,1,1).attr({
+                    fill: {
+                        linearGradient: {
+                            x1: 0,
+                            y1: 0,
+                            x2: 1,
+                            y2: 0,
+                            spreadMethod: 'pad',
+                            gradientUnits:'userSpaceOnUse'
+                        },
+                        stops: this.colorAxis.stops
+                    }
+                });
+                this.gradiend_ids[gradiend_id] = /(#.*)[)]/.exec(fake_rect.attr('fill'))[1];
+            }
+            this.base_gradient_id = this.gradiend_ids[gradiend_id];
         }
 
         var group = series.surface_group;
