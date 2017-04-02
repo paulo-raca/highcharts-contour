@@ -141,6 +141,16 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         var c = triangle_data.C;
         var abc = [a,b,c];
 
+
+        //SVG Group that holds everything
+        if (!triangle_data.group) {
+            triangle_data.group = renderer.g().add(this.surface_group);
+        }
+        triangle_data.group.attr({
+          zIndex: -(a.plotZ + b.plotZ + c.plotZ) / 3
+        });
+
+
         //Normalized values of the vertexes
         var values = [
             this.colorAxis.toRelativePosition(a.value),
@@ -245,14 +255,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                 }
                 nearest.onMouseOver(e);
             });
-//             triangle_data.shape.on('mouseout', function(e) {
-//                 triangle_data.A.onMouseOut();
-//                 triangle_data.B.onMouseOut();
-//                 triangle_data.C.onMouseOut();
-//                 console.log("=== MouseOut", chart.hoverPoint);
-//             });
+            triangle_data.shape.add(triangle_data.group);
         }
-        triangle_data.shape.add(this.surface_group);
 
         
         
@@ -316,8 +320,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                         'stroke': 'black',
                         'stroke-width': 1,
                     })
+                triangle_data.edge.add(triangle_data.group);
             }
-            triangle_data.edge.add(this.surface_group);
         } else if (triangle_data.edge) {
             triangle_data.edge.destroy();
             delete triangle_data.edge;
@@ -398,8 +402,6 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
                 appendEdge(a,b);
                 appendEdge(b,c);
                 appendEdge(c,a);
-
-                triangle_data.z_order = [(points[a].plotZ + points[b].plotZ + points[c].plotZ)/3];
             }
         };
 
@@ -456,11 +458,8 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
         // Remove extra unused triangles from previous rendering
         for (i=triangle_count; i<series.triangles.length; i++) {
-            if (series.triangles[i].shape) {
-                series.triangles[i].shape.destroy();
-            }
-            if (series.triangles[i].edge) {
-                series.triangles[i].edge.destroy();
+            if (series.triangles[i].group) {
+                series.triangles[i].group.destroy();
             }
             if (series.triangles[i].gradient) {
                 series.triangles[i].gradient.parentNode.removeChild(series.triangles[i].gradient);
@@ -468,15 +467,6 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         }
         series.triangles.splice(triangle_count, series.triangles.length - triangle_count);
 
-        series.triangles.sort(function (a,b) {
-            for (var i=0; i<3; i++) {
-                var ret = b.z_order[i] - a.z_order[i];
-                if (ret) {
-                    return ret;
-                }
-            }
-            return 0;
-        });
 
         
         var contours = [];
