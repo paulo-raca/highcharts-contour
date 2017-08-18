@@ -453,16 +453,18 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 });
 
 
-// ==== Matrix functions =======
-
-// http://rosettacode.org/wiki/Matrix_Transpose#JavaScript
+/**
+ * Matrix class
+ * Based on:
+ * - http://rosettacode.org/wiki/Matrix_Transpose#JavaScript
+ * - http://rosettacode.org/wiki/Reduced_row_echelon_form#JavaScript
+ */
 function Matrix(ary) {
     this.mtx = ary;
     this.height = ary.length;
     this.width = ary[0].length;
 }
 
-// http://rosettacode.org/wiki/Reduced_row_echelon_form#JavaScript
 Matrix.prototype.toReducedRowEchelonForm = function() {
     for (var col=0; col<this.width && col<this.height; col++) {
         var bestRow = null;
@@ -514,8 +516,9 @@ Matrix.prototype.toReducedRowEchelonForm = function() {
 
 Matrix.prototype.toString = function () {
     var s = [];
-    for (var i = 0; i < this.mtx.length; i++)
-    s.push(this.mtx[i].join(","));
+    for (var i = 0; i < this.mtx.length; i++) {
+        s.push(this.mtx[i].join(","));
+    }
     return s.join("\n");
 };
 
