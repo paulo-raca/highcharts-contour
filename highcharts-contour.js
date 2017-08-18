@@ -55,8 +55,6 @@
 		turboThreshold: 0
 	});
 
-	H.Axis.prototype.drawCrosshair = function() {};
-
 	// The Heatmap series type
 	seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 		type: "contour",
