@@ -339,17 +339,19 @@
 			};
 			var appendTriangle = function(a,b,c) {
 				if (validatePoint(points[a]) && validatePoint(points[b]) && validatePoint(points[c])) {
-					// Ensure all triangles are counter-clockwise.
-					// This is used to detect "wrap-around" edges.
-					var triangleArea = H.shapeArea([
-							{x:points[a].plotX, y:points[a].plotY},
-							{x:points[b].plotX, y:points[b].plotY},
-							{x:points[c].plotX, y:points[c].plotY}
-						]);
-					if (triangleArea < 0) {
-						var tmp = a;
-						a = b;
-						b = tmp;
+					if (series.is3d) {
+						// Ensure all triangles are counter-clockwise.
+						// This is used to detect "3D wrap-around" edges.
+						var triangleArea = H.shapeArea([
+								{x:points[a].plotX, y:points[a].plotY},
+								{x:points[b].plotX, y:points[b].plotY},
+								{x:points[c].plotX, y:points[c].plotY}
+							]);
+						if (triangleArea < 0) {
+							var tmp = a;
+							a = b;
+							b = tmp;
+						}
 					}
 
 					var triangle_data = series.triangles[triangle_count];
