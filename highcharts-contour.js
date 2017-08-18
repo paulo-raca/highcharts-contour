@@ -4,18 +4,18 @@
 * Author: Paulo Costa
 */
 
-(function (Highcharts) {
+(function (H) {
 
 "use strict";
 
 
-var defaultOptions = Highcharts.getOptions(),
-    each = Highcharts.each,
-    extendClass = Highcharts.extendClass,
-    merge = Highcharts.merge,
-    seriesTypes = Highcharts.seriesTypes,
-    wrap = Highcharts.wrap,
-    perspective = Highcharts.perspective,
+var defaultOptions = H.getOptions(),
+    each = H.each,
+    extendClass = H.extendClass,
+    merge = H.merge,
+    seriesTypes = H.seriesTypes,
+    wrap = H.wrap,
+    perspective = H.perspective,
     eps = 0.0001,
     SVG_NS = "http://www.w3.org/2000/svg",
     XLINK_NS = "http://www.w3.org/1999/xlink",
@@ -49,16 +49,16 @@ defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.scatter, {
     turboThreshold: 0,
 });
 
-Highcharts.Axis.prototype.drawCrosshair = function() {};
+H.Axis.prototype.drawCrosshair = function() {};
 
 // The Heatmap series type
 seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     type: 'contour',
     hasPointSpecificOptions: true,
     getSymbol: seriesTypes.scatter.prototype.getSymbol,
-    drawPoints: Highcharts.Series.prototype.drawPoints,
-    pointClass: Highcharts.Point,
-    pointAttribs: Highcharts.Series.prototype.pointAttribs,
+    drawPoints: H.Series.prototype.drawPoints,
+    pointClass: H.Point,
+    pointAttribs: H.Series.prototype.pointAttribs,
     translate: seriesTypes.scatter.prototype.translate,
 
     init: function (chart) {
@@ -334,7 +334,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
             if (validatePoint(points[a]) && validatePoint(points[b]) && validatePoint(points[c])) {
                 // Ensure all triangles are counter-clockwise.
                 // This is used to detect "wrap-around" edges.
-                var triangleArea = Highcharts.shapeArea([
+                var triangleArea = H.shapeArea([
                         {x:points[a].plotX, y:points[a].plotY},
                         {x:points[b].plotX, y:points[b].plotY},
                         {x:points[c].plotX, y:points[c].plotY}
@@ -431,7 +431,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         
         var contours = [];
         if (options.contours) {
-            Highcharts.each(options.contours, function(contourName) {
+            H.each(options.contours, function(contourName) {
                 switch (contourName) {
                     case "x":    contours.push({axis: series.xAxis,     attr: "x"}); break;
                     case "y":    contours.push({axis: series.yAxis,     attr: "y"}); break;
