@@ -49,25 +49,6 @@ defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.scatter, {
     turboThreshold: 0,
 });
 
-/**
-* Normalize a value into 0-1 range
-*/
-Highcharts.ColorAxis.prototype.toRelativePosition = function(value) {
-    if (this.isLog) {
-        value = this.val2lin(value);
-    }
-    return (value - this.min) / ((this.max - this.min) || 1);
-};
-
-wrap(Highcharts.ColorAxis.prototype, 'setAxisSize', function (proceed) {
-    if (this.legendSymbol) {
-        proceed.call(this);
-    } else {
-        this.len = 100;
-        this.pos = 0;
-    }
-});
-
 Highcharts.Axis.prototype.drawCrosshair = function() {};
 
 // The Heatmap series type
@@ -78,6 +59,7 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     drawPoints: Highcharts.Series.prototype.drawPoints,
     pointClass: Highcharts.Point,
     pointAttribs: Highcharts.Series.prototype.pointAttribs,
+    translate: seriesTypes.scatter.prototype.translate,
 
     init: function (chart) {
         this.is3d = chart.is3d && chart.is3d();
@@ -96,42 +78,6 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         seriesTypes.scatter.prototype.bindAxes.apply(this, arguments);
     },
 
-    //FIXME: Once https://github.com/highcharts/highcharts/pull/5497 has landed, this whole method can go away
-    translate: function () {
-        if (!this.is3d) {
-            seriesTypes.scatter.prototype.translate.apply(this, arguments);
-            return;
-        }
-        this.chart.options.chart.options3d.enabled = false;
-        seriesTypes.scatter.prototype.translate.apply(this, arguments);
-        this.chart.options.chart.options3d.enabled = true;
-
-        var series = this,
-            chart = series.chart,
-            zAxis = series.zAxis;
-
-        Highcharts.each(series.data, function (point) {
-            var p3d = {
-                x: point.plotX,
-                y: point.plotY,
-                z: zAxis.translate(zAxis.isLog && zAxis.val2lin ? zAxis.val2lin(point.z) : point.z)
-            };
-            point.plotXold = p3d.x;
-            point.plotYold = p3d.y;
-            point.plotZold = p3d.z;
-
-            p3d = perspective([p3d], chart, true)[0];
-            point.plotX = p3d.x;
-            point.plotY = p3d.y;
-            point.plotZ = p3d.z;
-        });
-        
-        
-        // Set color of each point (#10) 
-        // This is a quick hack. It might be better to look into a better solution later
-        series.translateColors();
-    },
-    
     drawTriangle: function (triangle_data, edgeCount, show_edges, contours) {
         var fill;
         var chart = this.chart;
@@ -153,9 +99,9 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
 
         //Normalized values of the vertexes
         var values = [
-            this.colorAxis.toRelativePosition(a.value),
-            this.colorAxis.toRelativePosition(b.value),
-            this.colorAxis.toRelativePosition(c.value)
+            this.colorAxis.normalizedValue(a.value),
+            this.colorAxis.normalizedValue(b.value),
+            this.colorAxis.normalizedValue(c.value)
         ];
 
         //All vertexes have the same value/color
@@ -386,18 +332,25 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
         };
         var appendTriangle = function(a,b,c) {
             if (validatePoint(points[a]) && validatePoint(points[b]) && validatePoint(points[c])) {
+                // Ensure all triangles are counter-clockwise.
+                // This is used to detect "wrap-around" edges.
+                var triangleArea = Highcharts.shapeArea([
+                        {x:points[a].plotX, y:points[a].plotY},
+                        {x:points[b].plotX, y:points[b].plotY},
+                        {x:points[c].plotX, y:points[c].plotY}
+                    ]);
+                if (triangleArea < 0) {
+                    var tmp = a;
+                    a = b;
+                    b = tmp;
+                }
+
                 var triangle_data = series.triangles[triangle_count];
                 if (!triangle_data) {
                     triangle_data = series.triangles[triangle_count] = {};
                 }
                 triangle_count++;
 
-                //Make sure the shape is counter-clockwise
-                if (shapeArea([points[a], points[b], points[c]], 'plotX', 'plotY') > 0) {
-                    var tmp = a;
-                    a = b;
-                    b = tmp;
-                }
                 triangle_data.a = a;
                 triangle_data.b = b;
                 triangle_data.c = c;
@@ -499,33 +452,6 @@ seriesTypes.contour = extendClass(seriesTypes.heatmap, {
     }
 });
 
-
-//FIXME: Temporary fix for drawing ColorAxis legend on 3-D charts
-//Once https://github.com/highcharts/highcharts/pull/5498 has landed, this whole method can go away
-Highcharts.ColorAxis.prototype.render = function () {
-    // ColorAxis should never be drawn in 3D, therefore the
-    // 3D flag is temporarialy disabled while it is rendered in the legend
-    var is3d = this.chart.is3d && this.chart.is3d();
-    if (is3d) {
-        this.chart.options.chart.options3d.enabled = false;
-    }
-    Highcharts.Axis.prototype.render.call(this, arguments);
-    if (is3d) {
-        this.chart.options.chart.options3d.enabled = true;
-    }
-};
-
-
-//Shoelace algorithm -- http://en.wikipedia.org/wiki/Shoelace_formula
-
-function shapeArea(vertexes, xProperty, yProperty) {
-    var area = 0;
-    for (var i=0; i<vertexes.length; i++) {
-        var j = (i+1) % vertexes.length;
-        area += vertexes[i][xProperty]*vertexes[j][yProperty] - vertexes[j][xProperty]*vertexes[i][yProperty];
-    }
-    return area / 2;
-};
 
 // ==== Matrix functions =======
 
