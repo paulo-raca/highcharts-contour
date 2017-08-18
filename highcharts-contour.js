@@ -34,32 +34,32 @@
 	defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.scatter, {
 		marker: {
 			radius: 0,
-			fillColor: '#ffffff',
+			fillColor: "#ffffff",
 			states: {
 				hover: {
-					radius: defaultOptions.plotOptions.scatter.marker.radius,
-				},
-			},
+					radius: defaultOptions.plotOptions.scatter.marker.radius
+				}
+			}
 		},
 		states: {
 			hover: {
 				halo: {
 					size: defaultOptions.plotOptions.scatter.marker.radius + 4,
 					attributes: {
-						fill: '#000000',
+						fill: "#000000"
 					},
-					opacity: 0.5,
-				},
-			},
+					opacity: 0.5
+				}
+			}
 		},
-		turboThreshold: 0,
+		turboThreshold: 0
 	});
 
 	H.Axis.prototype.drawCrosshair = function() {};
 
 	// The Heatmap series type
 	seriesTypes.contour = extendClass(seriesTypes.heatmap, {
-		type: 'contour',
+		type: "contour",
 		hasPointSpecificOptions: true,
 		getSymbol: seriesTypes.scatter.prototype.getSymbol,
 		drawPoints: H.Series.prototype.drawPoints,
@@ -75,11 +75,11 @@
 
 		bindAxes: function () {
 			if (this.is3d) {
-				this.axisTypes = ['xAxis', 'yAxis', 'zAxis', 'colorAxis'];
-				this.parallelArrays = ['x', 'y', 'z', 'value'];
+				this.axisTypes = ["xAxis", "yAxis", "zAxis", "colorAxis"];
+				this.parallelArrays = ["x", "y", "z", "value"];
 			} else {
-				this.axisTypes = ['xAxis', 'yAxis', 'colorAxis'];
-				this.parallelArrays = ['x', 'y', 'value'];
+				this.axisTypes = ["xAxis", "yAxis", "colorAxis"];
+				this.parallelArrays = ["x", "y", "value"];
 			}
 			seriesTypes.scatter.prototype.bindAxes.apply(this, arguments);
 		},
@@ -144,7 +144,8 @@
 					//SVGRenderer implementation of gradient is slow and leaks memory -- Lets do it ourselves
 					var gradient = triangle_data.gradient;
 					if (!gradient) {
-						gradient = triangle_data.gradient = renderer.createElement("linearGradient");
+						gradient = renderer.createElement("linearGradient");
+						triangle_data.gradient = gradient;
 						gradient.add(renderer.defs);
 						gradient.attr({
 							id: "contour-gradient-id-" + (gradient_id++),
@@ -162,7 +163,7 @@
 						});
 					}
 					gradient.element.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
-					fill = 'url(' + renderer.url + '#' + gradient.attr('id') + ')';
+					fill = "url(" + renderer.url + "#" + gradient.attr("id") + ")";
 				} else {
 					fill = {
 						linearGradient: {
@@ -170,8 +171,8 @@
 							y1: y1,
 							x2: x2,
 							y2: y2,
-							spreadMethod: 'pad',
-							gradientUnits:'userSpaceOnUse'
+							spreadMethod: "pad",
+							gradientUnits:"userSpaceOnUse"
 						},
 						stops: this.colorAxis.stops
 					};
@@ -180,33 +181,32 @@
 
 
 			var path = [
-				'M', a.plotX, a.plotY,
-				'L', b.plotX, b.plotY,
-				'L', c.plotX, c.plotY,
-				'Z'
+				"M", a.plotX, a.plotY,
+				"L", b.plotX, b.plotY,
+				"L", c.plotX, c.plotY,
+				"Z"
 			];
 
 			if (triangle_data.shape) {
 				triangle_data.shape
 					.animate({
-						d: path,
+						d: path
 					})
 					.attr({
-						fill: fill,
+						fill: fill
 					});
 			} else {
-				triangle_data.shape = renderer.path(path)
-					.attr({
-						'shape-rendering': 'crispEdges',
-						fill: fill
-					})
-				triangle_data.shape.on('mousemove', function(e) {
+				triangle_data.shape = renderer.path(path).attr({
+					"shape-rendering": "crispEdges",
+					fill: fill
+				});
+				triangle_data.shape.on("mousemove", function(e) {
 					e = chart.pointer.normalize(e);
 					var mx = e.chartX - chart.plotLeft;
 					var my = e.chartY - chart.plotTop;
 					var dist = function(P) {
 						return (P.plotX-mx)*(P.plotX-mx) + (P.plotY-my)*(P.plotY-my);
-					}
+					};
 					var nearest = triangle_data.A;
 					if (dist(triangle_data.B) < dist(nearest)) {
 						nearest = triangle_data.B;
@@ -226,14 +226,14 @@
 			var edge_path = [];
 			if (show_edges) {
 				var processEdge = function(a,b,A,B) {
-					if (!edgeCount[b + '-' + a]) {
-						if (edgeCount[a + '-' + b]-- == 1) {
+					if (!edgeCount[b + "-" + a]) {
+						if (edgeCount[a + "-" + b]-- == 1) {
 							edge_path.push(
-								'M', A.plotX, A.plotY,
-								'L', B.plotX, B.plotY);
+								"M", A.plotX, A.plotY,
+								"L", B.plotX, B.plotY);
 						}
 					}
-				}
+				};
 				processEdge(triangle_data.a, triangle_data.b, triangle_data.A, triangle_data.B);
 				processEdge(triangle_data.b, triangle_data.c, triangle_data.B, triangle_data.C);
 				processEdge(triangle_data.c, triangle_data.a, triangle_data.C, triangle_data.A);
@@ -259,10 +259,10 @@
 					}
 					if (contourVertexes.length == 2) {
 						edge_path.push(
-							'M',
-							contourVertexes[0][0] + ',' + contourVertexes[0][1],
-							'L',
-							contourVertexes[1][0] + ',' + contourVertexes[1][1]);
+							"M",
+							contourVertexes[0][0] + "," + contourVertexes[0][1],
+							"L",
+							contourVertexes[1][0] + "," + contourVertexes[1][1]);
 					}
 				}
 			}
@@ -275,9 +275,9 @@
 				} else {
 					triangle_data.edge = renderer.path(edge_path)
 						.attr({
-							'stroke-linecap': 'round',
-							'stroke': 'black',
-							'stroke-width': 1,
+							"stroke-linecap": "round",
+							"stroke": "black",
+							"stroke-width": 1,
 						})
 					triangle_data.edge.add(triangle_data.group);
 				}
@@ -316,13 +316,13 @@
 								y1: 0,
 								x2: 1,
 								y2: 0,
-								spreadMethod: 'pad',
-								gradientUnits:'userSpaceOnUse'
+								spreadMethod: "pad",
+								gradientUnits:"userSpaceOnUse"
 							},
 							stops: this.colorAxis.stops
 						}
 					});
-					this.gradiend_ids[gradiend_id] = /(#.*)[)]/.exec(fake_rect.attr('fill'))[1];
+					this.gradiend_ids[gradiend_id] = /(#.*)[)]/.exec(fake_rect.attr("fill"))[1];
 				}
 				this.base_gradient_id = this.gradiend_ids[gradiend_id];
 			}
@@ -335,7 +335,7 @@
 				return p && (typeof p.x === "number") && (typeof p.y === "number") && (typeof p.z === "number" || !series.is3d) && (typeof p.value === "number");
 			};
 			var appendEdge = function(a,b) {
-				egde_count[a+'-'+b] = (egde_count[a+'-'+b] || 0) + 1;
+				egde_count[a+"-"+b] = (egde_count[a+"-"+b] || 0) + 1;
 			};
 			var appendTriangle = function(a,b,c) {
 				if (validatePoint(points[a]) && validatePoint(points[b]) && validatePoint(points[c])) {
