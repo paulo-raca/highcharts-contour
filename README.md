@@ -13,7 +13,7 @@ Triangulation is performed either on a regular grid (Every 'grid_width' vertexes
 Demos
 =====
 
-[Heatmap demo](https://jsfiddle.net/9bj8rnws/)
+[Heatmap demo](https://jsfiddle.net/8kk6ggtq/)
 --------------------
 
 This is the same demo you can find for Highcharts Heatmap, but chart type was changed to 'contour', and you can toggle contour lines on each axis.
@@ -21,7 +21,7 @@ This is the same demo you can find for Highcharts Heatmap, but chart type was ch
 Note that it automatically uses Delaunay for triangulation, no extra effort required ;)
 
 
-[2-D Curve Plot](http://jsfiddle.net/gfo1kps9/)
+[2-D Curve Plot](https://jsfiddle.net/gfo1kps9/)
 ------------------------
 This demo uses a regular grid to plot a curve.
 
@@ -49,6 +49,6 @@ You can create a good chart even when you cannot sample your data in a rectangul
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
 
 
-[Utah Teapot / OBJ Reader](https://jsfiddle.net/ovLmmhah/)
+[Utah Teapot / OBJ Reader](https://jsfiddle.net/9kkx26ev/)
 --------------------
 This is a just-for-fun extra: Since this plugin can draw surfaces in 3D, why not use it to render the Utah Teapot from an OBJ file?!
