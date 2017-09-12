@@ -399,7 +399,7 @@
 							triangles.push(i00, i11, i10);
 						} else {
 							triangles.push(i00, i01, i10);
-							triangles.push(i01, i10, i11);
+							triangles.push(i01, i11, i10);
 						}
 					}
 				}
