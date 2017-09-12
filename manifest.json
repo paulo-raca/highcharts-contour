@@ -1,6 +1,6 @@
 {
     "name": "contour",
-    "version": "1.4.2",
+    "version": "1.4.3",
     "title": "Contour Curves",
     "author": {
         "name": "Paulo Costa",
@@ -23,13 +23,11 @@
         "contour"
     ],
     "demo": [
-        "http://jsfiddle.net/paulo_raca/72kc0cjf/",
-        "http://jsfiddle.net/paulo_raca/fmmc0be2/",
-        "http://jsfiddle.net/1peapgLw/",
-        "http://jsfiddle.net/yw56rtus/",
-        "http://jsfiddle.net/bgxd3tgr/",
-        "http://jsfiddle.net/f7ofc3q3/",
-        "http://jsfiddle.net/mqxmraL2/",
-        "http://jsfiddle.net/paulo_raca/qy7a8evj/"
+        "https://jsfiddle.net/9bj8rnws/",
+        "http://jsfiddle.net/gfo1kps9/",
+        "https://jsfiddle.net/f21y4L4x/",
+        "https://jsfiddle.net/nd49scnx/",
+        "https://jsfiddle.net/naq8uwLL/",
+        "https://jsfiddle.net/ovLmmhah/"
     ]
 }

@@ -13,51 +13,42 @@ Triangulation is performed either on a regular grid (Every 'grid_width' vertexes
 Demos
 =====
 
-[Basic heatmap demo](http://jsfiddle.net/paulo_raca/72kc0cjf/)
+[Heatmap demo](https://jsfiddle.net/9bj8rnws/)
 --------------------
 
-This is the same demo you can find at Highcharts Heatmap Demo, but chart type was changed to 'contour'.
+This is the same demo you can find for Highcharts Heatmap, but chart type was changed to 'contour', and you can toggle contour lines on each axis.
 
 Note that it automatically uses Delaunay for triangulation, no extra effort required ;)
 
 
-[Basic heatmap demo with contour lines](http://jsfiddle.net/paulo_raca/fmmc0be2/)
---------------------
-
-This charts is based on the Heatmap Demo, but you can toggle contour lines on each axis.
-
-
-[Countour curve](http://jsfiddle.net/1peapgLw/)
+[2-D Curve Plot](http://jsfiddle.net/gfo1kps9/)
 ------------------------
-This demo uses a regular grid to plot a saddle point. The color axis is split is several constant-color ranges, creating contour lines.
+This demo uses a regular grid to plot a curve.
+
+The color axis is split is several bands, making the contour visualization easier. Contour lines can also be toggled.
 
 
-[3-D demo](http://jsfiddle.net/yw56rtus/)
+[3-D Curve Plot](https://jsfiddle.net/f21y4L4x/)
 --------------------
-This demo demonstrates how to use this plugin to display 3-D contour curves
+This demo uses a regular grid to plot a curve on a 3D chart.
 
-Note that this relies on changes that are not in the main Highcharts distribution yet.
+On this example, Both Y and Color axes store the same values.
 
-
-[3-D demo with contour lines](http://jsfiddle.net/bgxd3tgr/)
---------------------
-Same as the previous one, but showing contour lines
-
-Note that this relies on changes that are not in the main Highcharts distribution yet.
+The color axis is split is several bands, making the contour visualization easier. Contour lines can also be toggled.
 
 
-[Random Point locations](http://jsfiddle.net/f7ofc3q3/)
+[Random Point locations](https://jsfiddle.net/nd49scnx/)
 ------------------------
 This demo plots a radial function, but the locations of the data points are spread randomly.
 
 You can create a good chart even when you cannot sample your data in a rectangular grid
 
 
-[Random Data demo](http://jsfiddle.net/mqxmraL2/)
+[Random Data demo](https://jsfiddle.net/naq8uwLL/)
 --------------------
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
 
 
-[Utah Teapot / OBJ Reader](http://jsfiddle.net/paulo_raca/qy7a8evj/)
+[Utah Teapot / OBJ Reader](https://jsfiddle.net/ovLmmhah/)
 --------------------
-Since this plugin can draw surfaces in 3D, why not use it to render the Utah Teapot from an OBJ file?!
+This is a just-for-fun extra: Since this plugin can draw surfaces in 3D, why not use it to render the Utah Teapot from an OBJ file?!
