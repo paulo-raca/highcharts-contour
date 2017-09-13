@@ -447,9 +447,7 @@
 					};
 				});
 			} else if (options.showContours) {
-				contours = this.is3d
-						? [{axis: series.yAxis,     attr: "y"}]
-						: [{axis: series.colorAxis, attr: "value"}];
+				contours.push({axis: series.colorAxis, attr: "value"});
 			}
 
 			// Render each triangle
