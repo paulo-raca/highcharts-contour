@@ -28,7 +28,7 @@ This demo uses a regular grid to plot a curve.
 The color axis is split is several bands, making the contour visualization easier. Contour lines can also be toggled.
 
 
-[3-D Curve Plot](https://jsfiddle.net/f21y4L4x/)
+[3-D Curve Plot](https://jsfiddle.net/w0azk859/)
 --------------------
 This demo uses a regular grid to plot a curve on a 3D chart.
 
