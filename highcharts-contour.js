@@ -18,6 +18,7 @@
 	var defaultOptions = H.getOptions(),
 		each = H.each,
 		find = H.find,
+		pick = H.pick,
 		extendClass = H.extendClass,
 		merge = H.merge,
 		seriesTypes = H.seriesTypes,
@@ -70,6 +71,56 @@
 			this.is3d = chart.is3d && chart.is3d();
 			this.gradiend_ids = {};
 			seriesTypes.scatter.prototype.init.apply(this, arguments);
+		},
+
+		dataFunction: function(coord) {
+			var result = this.options.dataFunction(coord);
+			if (typeof result === 'number') {
+				var ret = {};
+				each(this.parallelArrays, function (axis) {
+					ret[axis] = pick(coord[axis], result);
+				});
+				return ret;
+			} else if (typeof result === 'object') {
+				var ret = {};
+				each(this.parallelArrays, function (axis) {
+					ret[axis] = pick(coord[axis], result[axis], 0);
+				});
+				return ret;
+			} else {
+				return null;
+			}
+		},
+
+		setData: function () {
+			if (!this.options.dataFunction) {
+				return seriesTypes.scatter.prototype.setData.apply(this, arguments);
+			} else {
+				var series = this,
+					axis1_type = pick(series.options.axis1, 'x'),
+					axis2_type = pick(series.options.axis1, this.is3d ? 'z' : 'y'),
+					axis1 = series[axis1_type + 'Axis'],
+					axis2 = series[axis2_type + 'Axis'],
+					axis1_min = pick(axis1.userMin, axis1.options.min),
+					axis2_min = pick(axis2.userMin, axis2.options.min),
+					axis1_max = pick(axis1.userMax, axis1.options.max),
+					axis2_max = pick(axis2.userMax, axis2.options.max),
+					axis1_steps = pick(series.options.grid_width, series.options.grid_height, 21),
+					axis2_steps = pick(series.options.grid_height, series.options.grid_width, 21),
+					data = [];
+
+				for (var j=0; j<axis2_steps; j++) {
+					for (var i=0; i<axis1_steps; i++) {
+						var coord = {};
+						coord[axis1_type] = i / (axis1_steps - 1) * (axis1_max - axis1_min) + axis1_min;
+						coord[axis2_type] = j / (axis2_steps - 1) * (axis2_max - axis2_min) + axis2_min;
+						var point = this.dataFunction(coord);
+						data.push(point);
+					}
+				}
+				arguments[0] = data;
+				return seriesTypes.scatter.prototype.setData.apply(this, arguments);
+			}
 		},
 
 		bindAxes: function () {
@@ -590,7 +641,7 @@
 		var labels = {};
 		for (var i = 0; i <= axis.len; i++) {
 			var x2 = axis.toValue(i, true);
-			var v2 = contourSeries.options.dataFunction(contourAxisGetCoordinate(axis, i));
+			var v2 = contourSeries.dataFunction(contourAxisGetCoordinate(axis, i)).value;
 			if (i > 0 && v1 !== v2) {
 				for (var tickIndex in valueTicks) {
 					var tickValue = valueTicks[tickIndex];
