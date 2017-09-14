@@ -78,13 +78,13 @@
 			if (typeof result === 'number') {
 				var ret = {};
 				each(this.parallelArrays, function (axis) {
-					ret[axis] = pick(coord[axis], result);
+					ret[axis] = axis === 'value' ? result : pick(coord[axis], result);
 				});
 				return ret;
 			} else if (typeof result === 'object') {
 				var ret = {};
 				each(this.parallelArrays, function (axis) {
-					ret[axis] = pick(coord[axis], result[axis], 0);
+					ret[axis] = pick(result[axis], coord[axis], 0);
 				});
 				return ret;
 			} else {
@@ -136,6 +136,7 @@
 
 		drawTriangle: function (triangle_data, edgeCount, show_edges, contours) {
 			var fill;
+			var series = this;
 			var chart = this.chart;
 			var renderer = this.chart.renderer;
 			var a = triangle_data.A;
@@ -254,17 +255,50 @@
 					e = chart.pointer.normalize(e);
 					var mx = e.chartX - chart.plotLeft;
 					var my = e.chartY - chart.plotTop;
-					var dist = function(P) {
-						return (P.plotX-mx)*(P.plotX-mx) + (P.plotY-my)*(P.plotY-my);
-					};
-					var nearest = triangle_data.A;
-					if (dist(triangle_data.B) < dist(nearest)) {
-						nearest = triangle_data.B;
+
+					if (series.options.interpolateTooltip) {
+						//Find an interpolated point on [X, Y, Z, Value] right under the mouse
+						var m = new Matrix([
+							[a.plotX, a.plotY, 1, a.x, a.y, a.z, a.value],
+							[b.plotX, b.plotY, 1, b.x, b.y, b.z, b.value],
+							[c.plotX, c.plotY, 1, c.x, c.y, c.z, c.value]]);
+						m.toReducedRowEchelonForm();
+						var interpolated = {
+							x:     m.mtx[0][3] * mx + m.mtx[1][3] * my + m.mtx[2][3],
+							y:     m.mtx[0][4] * mx + m.mtx[1][4] * my + m.mtx[2][4],
+							z:     m.mtx[0][5] * mx + m.mtx[1][5] * my + m.mtx[2][5],
+							value: m.mtx[0][6] * mx + m.mtx[1][6] * my + m.mtx[2][6]
+						};
+						//If the series has a dataFunction, use it to calculate
+						//an exact value at the Interpolated point
+						if (series.options.dataFunction) {
+							interpolated = series.dataFunction(interpolated);
+						}
+
+						//debugger;
+						var interpolatedPoint = new H.Point().init(series);
+						H.extend(interpolatedPoint, interpolated);
+
+						//debugger;
+						var dataBackup = series.data;
+						series.data = [interpolatedPoint];
+						series.translate();
+						series.data = dataBackup;
+
+						chart.tooltip.refresh(interpolatedPoint, e);
+					} else {
+						var dist = function(P) {
+							return (P.plotX-mx)*(P.plotX-mx) + (P.plotY-my)*(P.plotY-my);
+						};
+						var nearest = triangle_data.A;
+						if (dist(triangle_data.B) < dist(nearest)) {
+							nearest = triangle_data.B;
+						}
+						if (dist(triangle_data.C) < dist(nearest)) {
+							nearest = triangle_data.C;
+						}
+						nearest.onMouseOver(e);
 					}
-					if (dist(triangle_data.C) < dist(nearest)) {
-						nearest = triangle_data.C;
-					}
-					nearest.onMouseOver(e);
 				});
 				triangle_data.shape.add(triangle_data.group);
 			}
