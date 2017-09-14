@@ -65,12 +65,16 @@
 		drawPoints: H.Series.prototype.drawPoints,
 		pointClass: H.Point,
 		pointAttribs: H.Series.prototype.pointAttribs,
-		translate: seriesTypes.scatter.prototype.translate,
 
 		init: function (chart) {
 			this.is3d = chart.is3d && chart.is3d();
 			this.gradiend_ids = {};
 			seriesTypes.scatter.prototype.init.apply(this, arguments);
+		},
+
+		translate: function () {
+			seriesTypes.scatter.prototype.translate.call(this, arguments);
+			this.translateColors();
 		},
 
 		dataFunction: function(coord) {
@@ -281,7 +285,8 @@
 						}
 
 						var interpolatedPoint = new H.Point().init(series);
-						H.extend(interpolatedPoint, interpolated);
+						interpolatedPoint.applyOptions(interpolated);
+
 						//interpolatedPoint.plotX = mx;
 						//interpolatedPoint.plotY = my;
 						var dataBackup = series.data;
