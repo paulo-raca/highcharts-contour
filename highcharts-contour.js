@@ -17,6 +17,7 @@
 
 	var defaultOptions = H.getOptions(),
 		each = H.each,
+		find = H.find,
 		extendClass = H.extendClass,
 		merge = H.merge,
 		seriesTypes = H.seriesTypes,
@@ -526,5 +527,115 @@
 		}
 		return s.join("\n");
 	};
+
+
+	/**
+	* Contour axis
+	* Just add an extra axis with `contourAxis: true` and it will display labels for 'value' at the intersection with the contour curves
+	*/
+	H.Axis.prototype.defaultOptions.contourAxis = {
+		//tickColor: 'black',
+		tickWidth: 1,
+		tickColor: 'black',
+		title: {
+			text: null
+		},
+	};
+
+	var contourAxisGetCoordinate = function (axis, pixels) {
+		var x, y;
+		var xAxis = axis.contourSeries.xAxis;
+		var yAxis = axis.contourSeries.yAxis;
+		if (axis.isXAxis) {
+			x = xAxis.toValue(pixels, true);
+			y = yAxis.toValue(!axis.opposite !== !axis.chart.inverted ? 0 : yAxis.len, true);
+		} else {
+			x = xAxis.toValue(!axis.opposite !== !axis.chart.inverted ? xAxis.len : 0, true);
+			y = yAxis.toValue(pixels, true);
+		}
+		return {
+			x: x,
+			y: y
+		};
+	}
+
+	var contourAxisTickPositioner = function() {
+		var axis = this;
+		var contourSeries = axis.contourSeries;
+		if (!contourSeries) {
+			contourSeries = find(axis.chart.series, function(serie) {
+				if (axis.options.serie) {
+					return serie.id === axis.options.serie || (serie.options && serie.options.id === axis.options.serie);
+				} else {
+					return serie.type === 'contour';
+				}
+			});
+			if (!contourSeries) {
+				H.error(17, false);
+				return [];
+			}
+			axis.contourSeries = contourSeries;
+			each(contourSeries.axisTypes || [], function(AXIS) {
+				wrap(contourSeries[AXIS], 'setTickPositions', function(proceed) {
+					proceed.apply(this, [].slice.call(arguments, 1));
+					axis.forceRedraw = true;
+				});
+			});
+		}
+		var valueTicks = contourSeries.colorAxis.tickPositions;
+		if (!valueTicks || valueTicks.length === 0)
+			return [];
+		var x1, v1;
+		var ret = [];
+		var labels = {};
+		for (var i = 0; i <= axis.len; i++) {
+			var x2 = axis.toValue(i, true);
+			var v2 = contourSeries.options.dataFunction(contourAxisGetCoordinate(axis, i));
+			if (i > 0 && v1 !== v2) {
+				for (var tickIndex in valueTicks) {
+					var tickValue = valueTicks[tickIndex];
+					if (tickValue >= Math.min(v1, v2) && tickValue <= Math.max(v1, v2)) {
+						var q = (tickValue - v1) / (v2 - v1);
+						var pos = q * (x2 - x1) + x1;
+						ret.push(pos);
+						labels[pos] = tickValue;
+					}
+				}
+			}
+			x1 = x2;
+			v1 = v2;
+		}
+
+		axis._contourAxisLabels = labels;
+		return ret;
+	}
+
+	wrap(H.Axis.prototype, 'setOptions', function(proceed, userOptions) {
+		if (userOptions.contourAxis) {
+			userOptions = merge(
+				this.defaultOptions.contourAxis,
+				merge(userOptions, {
+					min: 0,
+					max: 1,
+					startOnTick: false,
+					endOnTick: false,
+					tickPositioner: contourAxisTickPositioner
+				}));
+		}
+
+		return proceed.call(this, userOptions);
+	});
+
+
+	wrap(H.Axis.prototype, 'init', function(proceed, chart, options) {
+		proceed.apply(this, [].slice.call(arguments, 1));
+		if (this.options.tickPositioner === contourAxisTickPositioner) {
+			var oldFormatter = this.labelFormatter;
+			this.labelFormatter = function() {
+				this.value = this.axis._contourAxisLabels[this.value];
+				return oldFormatter.call(this);
+			};
+		}
+	});
 
 }));
