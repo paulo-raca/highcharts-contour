@@ -42,6 +42,11 @@ On this example, Both Y and Color axes store the same values.
 The color axis is split is several bands, making the contour visualization easier. Contour lines can also be toggled.
 
 
+[3-D Curve Plot #2](https://jsfiddle.net/rcugLvbu/)
+--------------------
+Similar to be previous demo, but demonstrates that the Y and Value don't need to be the same.
+
+
 [Random Point locations](https://jsfiddle.net/nd49scnx/)
 ------------------------
 This demo plots a radial function, but the locations of the data points are spread randomly.
