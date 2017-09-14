@@ -1,13 +1,17 @@
 Contour curves for Highcharts
 =============================
 
-This is a plugin for Highcharts to display contour curves (Or smooth heatmaps, if you prefer)
+This is a plugin for Highcharts to display contour curves.
 
-It extends the existing [heatmap](http://www.highcharts.com/maps/demo/heatmap) module (which you must include) to display smooth gradients that interpolate the data points
+It extends the existing [heatmap](http://www.highcharts.com/maps/demo/heatmap) module (which you must include) to display smooth gradients that interpolate the data points, and optionally contour lines over it.
 
-This extension works by triangulating all the data points and filling each triangle with a linear gradient that matches the values assigned to each vertex.
+It can use either a list of discrete data points or a math function as an input.
 
-Triangulation is performed either on a regular grid (Every 'grid_width' vertexes make a row/column) or using [Delaunay](http://en.wikipedia.org/wiki/Delaunay_triangulation) (In case your data is irregular or you are just too lazy). If you decide to use Delaunay, you will have to include the library for [Fast Delaunay Triangulation in JavaScript](https://github.com/ironwallaby/delaunay)
+If you specify a discrete list of points, the surface can be triangulated in 3 ways:
+- Automatically, using [Delaunay](http://en.wikipedia.org/wiki/Delaunay_triangulation) (In case your data is irregular or you are just lazy). You'll have to include [Fast Delaunay Triangulation in JavaScript](https://github.com/ironwallaby/delaunay).
+- In a grid, where each row has `grid_width` data points.
+- Manually specifying a list of triangles.
+
 
 
 Demos
@@ -36,14 +40,14 @@ Extras:
 This example augments the 2-D Curve Plot demo with extra axes that display the values of the contour curves.
 
 
-[3-D Curve Plot](https://jsfiddle.net/6o0fk0kz/)
+[3-D Curve Plot](https://jsfiddle.net/b2vvuq7a/)
 --------------------
 This is equivalent to the 2-D Curve Plot demo, in 3D.
 
 On this example, Both Y and Color axes store the same values, a trick that makes visualization easier.
 
 
-[3-D Curve Plot #2](https://jsfiddle.net/66k4zq0m/)
+[3-D Curve Plot #2](https://jsfiddle.net/7dt9d9oq/)
 --------------------
 Similar to the previous demo, but Y and Color axes have indenpendent values.
 
