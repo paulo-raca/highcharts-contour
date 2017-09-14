@@ -21,30 +21,31 @@ This is the same demo you can find for Highcharts Heatmap, but chart type was ch
 Note that it automatically uses Delaunay for triangulation, no extra effort required ;)
 
 
-[2-D Curve Plot](https://jsfiddle.net/z8durg0h/)
+[2-D Curve Plot](https://jsfiddle.net/mk43z2cg/)
 ------------------------
 This demo uses the built-in suport for evaluating a `dataFunction`: The points are evaluated in a regular grid and produce a 2D chart.
 
-The color axis is split is several bands, making the contour visualization easier. Contour lines can also be toggled.
+Extras:
+- The color axis is split is several bands, making the contour visualization easier.
+- Contour lines can be toggled.
+- Tooltip can be extrapolated for any point in the chart, not only the points used for rendering.
 
 
-[2-D Curve Plot with contour axis labels](https://jsfiddle.net/bzc21f9n/)
+[2-D Curve Plot with contour axis labels](https://jsfiddle.net/u1qd5362/)
 ------------------------
 This example augments the 2-D Curve Plot demo with extra axes that display the values of the contour curves.
 
 
-[3-D Curve Plot](https://jsfiddle.net/21jqnkbx/)
+[3-D Curve Plot](https://jsfiddle.net/6o0fk0kz/)
 --------------------
-This demo uses the built-in suport for evaluating a `dataFunction`: The points are evaluated in a regular grid and produce a 3D chart.
+This is equivalent to the 2-D Curve Plot demo, in 3D.
 
-On this example, Both Y and Color axes store the same values.
-
-The color axis is split is several bands, making the contour visualization easier. Contour lines can also be toggled.
+On this example, Both Y and Color axes store the same values, a trick that makes visualization easier.
 
 
-[3-D Curve Plot #2](https://jsfiddle.net/rcugLvbu/)
+[3-D Curve Plot #2](https://jsfiddle.net/66k4zq0m/)
 --------------------
-Similar to be previous demo, but demonstrates that the Y and Value don't need to be the same.
+Similar to the previous demo, but Y and Color axes have indenpendent values.
 
 
 [Random Point locations](https://jsfiddle.net/nd49scnx/)
