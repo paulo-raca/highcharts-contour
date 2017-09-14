@@ -253,8 +253,13 @@
 				});
 				triangle_data.shape.on("mousemove", function(e) {
 					e = chart.pointer.normalize(e);
-					var mx = e.chartX - chart.plotLeft;
-					var my = e.chartY - chart.plotTop;
+					if (chart.inverted) {
+						var mx = chart.plotTop + chart.plotHeight - e.chartY;
+						var my = chart.plotLeft + chart.plotWidth - e.chartX;
+					} else {
+						var mx = e.chartX - chart.plotLeft;
+						var my = e.chartY - chart.plotTop;
+					}
 
 					if (series.options.interpolateTooltip) {
 						//Find an interpolated point on [X, Y, Z, Value] right under the mouse
@@ -275,11 +280,10 @@
 							interpolated = series.dataFunction(interpolated);
 						}
 
-						//debugger;
 						var interpolatedPoint = new H.Point().init(series);
 						H.extend(interpolatedPoint, interpolated);
-
-						//debugger;
+						//interpolatedPoint.plotX = mx;
+						//interpolatedPoint.plotY = my;
 						var dataBackup = series.data;
 						series.data = [interpolatedPoint];
 						series.translate();
