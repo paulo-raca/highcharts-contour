@@ -352,10 +352,8 @@
 					}
 					if (contourVertexes.length == 2) {
 						edge_path.push(
-							"M",
-							contourVertexes[0][0] + "," + contourVertexes[0][1],
-							"L",
-							contourVertexes[1][0] + "," + contourVertexes[1][1]);
+							"M", contourVertexes[0][0], contourVertexes[0][1],
+							"L", contourVertexes[1][0], contourVertexes[1][1]);
 					}
 				}
 			}
