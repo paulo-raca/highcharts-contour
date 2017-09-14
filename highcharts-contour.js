@@ -664,6 +664,7 @@
 				wrap(contourSeries[AXIS], 'setTickPositions', function(proceed) {
 					proceed.apply(this, [].slice.call(arguments, 1));
 					axis.forceRedraw = true;
+					axis.setScale();
 				});
 			});
 		}
