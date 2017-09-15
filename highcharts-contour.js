@@ -269,11 +269,12 @@
 							[c.plotX, c.plotY, 1, c.x, c.y, c.z, c.value]]);
 						m.toReducedRowEchelonForm();
 						var interpolated = {
-							x:     m.mtx[0][3] * mx + m.mtx[1][3] * my + m.mtx[2][3],
-							y:     m.mtx[0][4] * mx + m.mtx[1][4] * my + m.mtx[2][4],
-							z:     m.mtx[0][5] * mx + m.mtx[1][5] * my + m.mtx[2][5],
-							value: m.mtx[0][6] * mx + m.mtx[1][6] * my + m.mtx[2][6]
+							x:     axisRound(series.xAxis, m.mtx[0][3] * mx + m.mtx[1][3] * my + m.mtx[2][3]),
+							y:     axisRound(series.yAxis, m.mtx[0][4] * mx + m.mtx[1][4] * my + m.mtx[2][4]),
+							z:     axisRound(series.zAxis, m.mtx[0][5] * mx + m.mtx[1][5] * my + m.mtx[2][5]),
+							value:                         m.mtx[0][6] * mx + m.mtx[1][6] * my + m.mtx[2][6]
 						};
+
 						//If the series has a dataFunction, use it to calculate
 						//an exact value at the Interpolated point
 						if (series.options.dataFunction) {
@@ -545,6 +546,23 @@
 			}
 		}
 	});
+
+
+
+	/**
+	 * Smart-rounding of axis values, where the precision depends on the axis slope.
+	 */
+	var axisRound = function (axis, value) {
+		if (!axis) {
+			return value;
+		}
+		var valueMin = axis.toValue(axis.toPixels(value) - 0.5);
+		var valueMax = axis.toValue(axis.toPixels(value) + 0.5);
+		var valueInterval = Math.abs(valueMax - valueMin);
+		var roundedValueInterval = H.normalizeTickInterval(valueInterval, [1,2,5,10], H.getMagnitude(valueInterval), true);
+		var roundValue = H.correctFloat(roundedValueInterval * Math.round(value / roundedValueInterval));
+		return roundValue;
+	};
 
 
 	/**
