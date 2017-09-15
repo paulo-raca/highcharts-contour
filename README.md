@@ -40,14 +40,14 @@ Extras:
 This example augments the 2-D Curve Plot demo with extra axes that display the values of the contour curves.
 
 
-[3-D Curve Plot](https://jsfiddle.net/b2vvuq7a/)
+[3-D Curve Plot](https://jsfiddle.net/g1mnqr0k/)
 --------------------
 This is equivalent to the 2-D Curve Plot demo, in 3D.
 
 On this example, Both Y and Color axes store the same values, a trick that makes visualization easier.
 
 
-[3-D Curve Plot #2](https://jsfiddle.net/7dt9d9oq/)
+[3-D Curve Plot #2](https://jsfiddle.net/7qd7sfam/)
 --------------------
 Similar to the previous demo, but Y and Color axes have indenpendent values.
 
