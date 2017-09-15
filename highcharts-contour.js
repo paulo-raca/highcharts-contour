@@ -86,11 +86,7 @@
 				});
 				return ret;
 			} else if (typeof result === 'object') {
-				var ret = {};
-				each(this.parallelArrays, function (axis) {
-					ret[axis] = pick(result[axis], coord[axis], 0);
-				});
-				return ret;
+				return H.merge(coord, result);
 			} else {
 				return null;
 			}
