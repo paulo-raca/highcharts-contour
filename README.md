@@ -25,7 +25,7 @@ This is the same demo you can find for Highcharts Heatmap, but chart type was ch
 Note that it automatically uses Delaunay for triangulation, no extra effort required ;)
 
 
-[2-D Curve Plot](https://jsfiddle.net/mk43z2cg/)
+[2-D Curve Plot](https://jsfiddle.net/8rfhvdvr/)
 ------------------------
 This demo uses the built-in suport for evaluating a `dataFunction`: The points are evaluated in a regular grid and produce a 2D chart.
 
@@ -35,19 +35,19 @@ Extras:
 - Tooltip can be extrapolated for any point in the chart, not only the points used for rendering.
 
 
-[2-D Curve Plot with contour axis labels](https://jsfiddle.net/u1qd5362/)
+[2-D Curve Plot with contour axis labels](https://jsfiddle.net/ag636fyc/)
 ------------------------
 This example augments the 2-D Curve Plot demo with extra axes that display the values of the contour curves.
 
 
-[3-D Curve Plot](https://jsfiddle.net/g1mnqr0k/)
+[3-D Curve Plot](https://jsfiddle.net/d1aqhg22/)
 --------------------
 This is equivalent to the 2-D Curve Plot demo, in 3D.
 
 On this example, Both Y and Color axes store the same values, a trick that makes visualization easier.
 
 
-[3-D Curve Plot #2](https://jsfiddle.net/7qd7sfam/)
+[3-D Curve Plot #2](https://jsfiddle.net/nt5qo55v/)
 --------------------
 Similar to the previous demo, but Y and Color axes have indenpendent values.
 
