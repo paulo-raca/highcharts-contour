@@ -313,7 +313,9 @@
 
 			// Draw edges around the triangle and/or on contour curves
 
-			var edge_path = [];
+			var edge_path = triangle_data.group.edge_path;
+			var edge_path_old = triangle_data.group.edge_path_old;
+
 			if (show_edges || show_triangles) {
 				var processEdge = function(a,b,A,B) {
 					if (!edgeCount[b + "-" + a]) {
@@ -321,6 +323,9 @@
 							edge_path.push(
 								"M", A.plotX, A.plotY,
 								"L", B.plotX, B.plotY);
+							edge_path_old.push(
+								"M", A.plotX_prev, A.plotY_prev,
+								"L", B.plotX_prev, B.plotY_prev);
 						}
 					} else if (show_triangles) {
 						edgeCount[a + "-" + b]--;
@@ -334,18 +339,29 @@
 			for (var contour_index=0; contour_index<contours.length; contour_index++) {
 				var contourAxis = contours[contour_index].axis;
 				var contourAttr = contours[contour_index].attr;
-				//TODO: Think carefully about corner conditions and preventing duplicated line segments
+
 				for (var tickIndex in contourAxis.tickPositions) {
 					var tickValue = contourAxis.tickPositions[tickIndex];
 					var contourVertexes=[];
 					for (var i=0; i<3; i++) {
-						var x1 = abc[ i     ].plotX, y1 = abc[ i     ].plotY, v1=abc[ i     ][contourAttr];
-						var x2 = abc[(i+1)%3].plotX, y2 = abc[(i+1)%3].plotY, v2=abc[(i+1)%3][contourAttr];
+						var x1      = abc[ i     ].plotX,
+							x1_prev = abc[ i     ].plotX_prev,
+							y1      = abc[ i     ].plotY,
+							y1_prev = abc[ i     ].plotY_prev,
+							v1      = abc[ i     ][contourAttr],
+							x2      = abc[(i+1)%3].plotX,
+							x2_prev = abc[(i+1)%3].plotX_prev,
+							y2      = abc[(i+1)%3].plotY,
+							y2_prev = abc[(i+1)%3].plotY_prev,
+							v2      = abc[(i+1)%3][contourAttr];
+
 						if (v1 != v2 && tickValue >= Math.min(v1, v2) && tickValue < Math.max(v1, v2)) {
 							var q = (tickValue-v1)/(v2-v1);
 							contourVertexes.push([
 								q*(x2-x1) + x1,
-								q*(y2-y1) + y1
+								q*(y2-y1) + y1,
+								q*(x2_prev-x1_prev) + x1_prev,
+								q*(y2_prev-y1_prev) + y1_prev
 							]);
 						}
 					}
@@ -353,30 +369,11 @@
 						edge_path.push(
 							"M", contourVertexes[0][0], contourVertexes[0][1],
 							"L", contourVertexes[1][0], contourVertexes[1][1]);
+						edge_path_old.push(
+							"M", contourVertexes[0][2], contourVertexes[0][3],
+							"L", contourVertexes[1][2], contourVertexes[1][3]);
 					}
 				}
-			}
-
-			if (edge_path.length) {
-				if (triangle_data.edge) {
-					triangle_data.edge.animate({
-						d: edge_path,
-					});
-					if (triangle_data.edge.parent != triangle_data.group) {
-						triangle_data.edge.add(triangle_data.group);
-					}
-				} else {
-					triangle_data.edge = renderer.path(edge_path)
-						.attr({
-							"stroke-linecap": "round",
-							"stroke": "black",
-							"stroke-width": 1,
-						})
-					triangle_data.edge.add(triangle_data.group);
-				}
-			} else if (triangle_data.edge) {
-				triangle_data.edge.destroy();
-				delete triangle_data.edge;
 			}
 		},
 
@@ -385,7 +382,7 @@
 			for (var i=0; i<series.triangles.length; i++) {
 				series.triangles[i].group_id = series.is3d ? i : 0;
 
-				series.triangles[i].group_id = Math.round(Math.random()*100);
+				//TODO: On 3D, group faces that form a continuous surface
 			}
 
 			//Add group on the SVG
@@ -582,7 +579,8 @@
 			//Assign triangles in groups (drawing layers)
 			this.assignGroups();
 			H.objectEach(series.groups, function(group) {
-				group.edges = [];
+				group.edge_path_old = [];
+				group.edge_path = [];
 			});
 
 			var contours = [];
@@ -603,6 +601,40 @@
 			for (i=0; i<triangle_count; i++) {
 				series.drawTriangle(series.triangles[i], egde_count, pick(options.showFaces, true), pick(options.showEdges, false), pick(options.showTriangles, false), contours);
 			}
+
+			// Render edges
+			H.objectEach(series.groups, function(group) {
+				if (group.edge_path.length) {
+					if (group.edges) {
+						group.edges
+							.attr({
+								d: group.edge_path_old,
+							})
+							.animate({
+								d: group.edge_path,
+							});
+					} else {
+						group.edges = renderer.path(group.edge_path)
+							.attr({
+								"stroke-linecap": "round",
+								"stroke": "black",
+								"stroke-width": 1,
+								"zIndex": 1
+							})
+						group.edges.add(group);
+					}
+				} else if (group.edges) {
+					group.edges.destroy();
+					delete group.edges;
+				}
+			});
+
+			//Prepare point for next rendering
+			H.each(points, function(point) {
+				point.plotX_prev = point.plotX;
+				point.plotY_prev = point.plotY;
+				point.plotZ_prev = point.plotZ;
+			});
 		}
 	});
 
