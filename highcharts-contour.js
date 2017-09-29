@@ -134,7 +134,7 @@
 			seriesTypes.scatter.prototype.bindAxes.apply(this, arguments);
 		},
 
-		drawTriangle: function (triangle_data, edgeCount, show_edges, contours) {
+		drawTriangle: function (triangle_data, edgeCount, show_faces, show_edges, show_triangles, contours) {
 			var fill;
 			var series = this;
 			var chart = this.chart;
@@ -153,160 +153,161 @@
 				zIndex: -(a.plotZ + b.plotZ + c.plotZ) / 3
 			});
 
+			if (show_faces) {
+				// Normalized values of the vertexes
+				var values = [
+					this.colorAxis.normalizedValue(a.value),
+					this.colorAxis.normalizedValue(b.value),
+					this.colorAxis.normalizedValue(c.value)
+				];
 
-			// Normalized values of the vertexes
-			var values = [
-				this.colorAxis.normalizedValue(a.value),
-				this.colorAxis.normalizedValue(b.value),
-				this.colorAxis.normalizedValue(c.value)
-			];
-
-			// All vertexes have the same value/color
-			if (Math.abs(values[0] - values[1]) < eps && Math.abs(values[0] - values[2]) < eps) {
-				fill = this.colorAxis.toColor((a.value + b.value + c.value) / 3);
-			// Use a linear gradient to interpolate values/colors
-			} else {
-				// Find function where "Value = A*X + B*Y + C" at the 3 vertexes
-				var m = new Matrix([
-					[a.plotX, a.plotY, 1, values[0]],
-					[b.plotX, b.plotY, 1, values[1]],
-					[c.plotX, c.plotY, 1, values[2]]]);
-				m.toReducedRowEchelonForm();
-				var A = m.mtx[0][3];
-				var B = m.mtx[1][3];
-				var C = m.mtx[2][3];
-
-				// For convenience, we place our gradient control points at (k*A, k*B)
-				// We can find the value of K as:
-				//   Value = A*X + B*Y + C =
-				//   Value = A*(A*k) + B*(B*k) + C
-				//   Value = A²*k + B²*k + C
-				//   Value = k*(A² + B²) + C
-				// k = (Value - C) / (A² + B²)
-				var k0 = (0-C) / (A*A + B*B);
-				var k1 = (1-C) / (A*A + B*B);
-				var x1 = k0*A;
-				var y1 = k0*B;
-				var x2 = k1*A;
-				var y2 = k1*B;
-
-				// Assign a linear gradient that interpolates all 3 vertexes
-				if (renderer.isSVG) {
-					//SVGRenderer implementation of gradient is slow and leaks memory -- Lets do it ourselves
-					var gradient = triangle_data.gradient;
-					if (!gradient) {
-						gradient = renderer.createElement("linearGradient");
-						triangle_data.gradient = gradient;
-						gradient.add(renderer.defs);
-						gradient.attr({
-							id: "contour-gradient-id-" + (gradient_id++),
-							x1: x1,
-							y1: y1,
-							x2: x2,
-							y2: y2
-						});
-					} else {
-						gradient.animate({
-							x1: x1,
-							y1: y1,
-							x2: x2,
-							y2: y2
-						});
-					}
-					gradient.element.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
-					fill = "url(" + renderer.url + "#" + gradient.attr("id") + ")";
+				// All vertexes have the same value/color
+				if (Math.abs(values[0] - values[1]) < eps && Math.abs(values[0] - values[2]) < eps) {
+					fill = this.colorAxis.toColor((a.value + b.value + c.value) / 3);
+				// Use a linear gradient to interpolate values/colors
 				} else {
-					fill = {
-						linearGradient: {
-							x1: x1,
-							y1: y1,
-							x2: x2,
-							y2: y2,
-							spreadMethod: "pad",
-							gradientUnits:"userSpaceOnUse"
-						},
-						stops: this.colorAxis.stops
-					};
+					// Find function where "Value = A*X + B*Y + C" at the 3 vertexes
+					var m = new Matrix([
+						[a.plotX, a.plotY, 1, values[0]],
+						[b.plotX, b.plotY, 1, values[1]],
+						[c.plotX, c.plotY, 1, values[2]]]);
+					m.toReducedRowEchelonForm();
+					var A = m.mtx[0][3];
+					var B = m.mtx[1][3];
+					var C = m.mtx[2][3];
+
+					// For convenience, we place our gradient control points at (k*A, k*B)
+					// We can find the value of K as:
+					//   Value = A*X + B*Y + C =
+					//   Value = A*(A*k) + B*(B*k) + C
+					//   Value = A²*k + B²*k + C
+					//   Value = k*(A² + B²) + C
+					// k = (Value - C) / (A² + B²)
+					var k0 = (0-C) / (A*A + B*B);
+					var k1 = (1-C) / (A*A + B*B);
+					var x1 = k0*A;
+					var y1 = k0*B;
+					var x2 = k1*A;
+					var y2 = k1*B;
+
+					// Assign a linear gradient that interpolates all 3 vertexes
+					if (renderer.isSVG) {
+						//SVGRenderer implementation of gradient is slow and leaks memory -- Lets do it ourselves
+						var gradient = triangle_data.gradient;
+						if (!gradient) {
+							gradient = renderer.createElement("linearGradient");
+							triangle_data.gradient = gradient;
+							gradient.add(renderer.defs);
+							gradient.attr({
+								id: "contour-gradient-id-" + (gradient_id++),
+								x1: x1,
+								y1: y1,
+								x2: x2,
+								y2: y2
+							});
+						} else {
+							gradient.animate({
+								x1: x1,
+								y1: y1,
+								x2: x2,
+								y2: y2
+							});
+						}
+						gradient.element.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
+						fill = "url(" + renderer.url + "#" + gradient.attr("id") + ")";
+					} else {
+						fill = {
+							linearGradient: {
+								x1: x1,
+								y1: y1,
+								x2: x2,
+								y2: y2,
+								spreadMethod: "pad",
+								gradientUnits:"userSpaceOnUse"
+							},
+							stops: this.colorAxis.stops
+						};
+					}
 				}
-			}
 
 
-			var path = [
-				"M", a.plotX, a.plotY,
-				"L", b.plotX, b.plotY,
-				"L", c.plotX, c.plotY,
-				"Z"
-			];
+				var path = [
+					"M", a.plotX, a.plotY,
+					"L", b.plotX, b.plotY,
+					"L", c.plotX, c.plotY,
+					"Z"
+				];
 
-			if (triangle_data.shape) {
-				triangle_data.shape
-					.animate({
-						d: path
-					})
-					.attr({
+				if (triangle_data.shape) {
+					triangle_data.shape
+						.animate({
+							d: path
+						})
+						.attr({
+							fill: fill
+						});
+				} else {
+					triangle_data.shape = renderer.path(path).attr({
+						"shape-rendering": "crispEdges",
 						fill: fill
 					});
-			} else {
-				triangle_data.shape = renderer.path(path).attr({
-					"shape-rendering": "crispEdges",
-					fill: fill
-				});
-				triangle_data.shape.on("mousemove", function(e) {
-					e = chart.pointer.normalize(e);
-					if (chart.inverted) {
-						var mx = chart.plotTop + chart.plotHeight - e.chartY;
-						var my = chart.plotLeft + chart.plotWidth - e.chartX;
-					} else {
-						var mx = e.chartX - chart.plotLeft;
-						var my = e.chartY - chart.plotTop;
-					}
-
-					if (series.options.interpolateTooltip) {
-						//Find an interpolated point on [X, Y, Z, Value] right under the mouse
-						var m = new Matrix([
-							[a.plotX, a.plotY, 1, a.x, a.y, a.z, a.value],
-							[b.plotX, b.plotY, 1, b.x, b.y, b.z, b.value],
-							[c.plotX, c.plotY, 1, c.x, c.y, c.z, c.value]]);
-						m.toReducedRowEchelonForm();
-						var interpolated = {
-							x:     axisRound(series.xAxis, m.mtx[0][3] * mx + m.mtx[1][3] * my + m.mtx[2][3]),
-							y:     axisRound(series.yAxis, m.mtx[0][4] * mx + m.mtx[1][4] * my + m.mtx[2][4]),
-							z:     axisRound(series.zAxis, m.mtx[0][5] * mx + m.mtx[1][5] * my + m.mtx[2][5]),
-							value:                         m.mtx[0][6] * mx + m.mtx[1][6] * my + m.mtx[2][6]
-						};
-
-						//If the series has a dataFunction, use it to calculate
-						//an exact value at the Interpolated point
-						if (series.options.dataFunction) {
-							interpolated = series.dataFunction(interpolated);
+					triangle_data.shape.on("mousemove", function(e) {
+						e = chart.pointer.normalize(e);
+						if (chart.inverted) {
+							var mx = chart.plotTop + chart.plotHeight - e.chartY;
+							var my = chart.plotLeft + chart.plotWidth - e.chartX;
+						} else {
+							var mx = e.chartX - chart.plotLeft;
+							var my = e.chartY - chart.plotTop;
 						}
 
-						var interpolatedPoint = new H.Point().init(series);
-						interpolatedPoint.applyOptions(interpolated);
+						if (series.options.interpolateTooltip) {
+							//Find an interpolated point on [X, Y, Z, Value] right under the mouse
+							var m = new Matrix([
+								[a.plotX, a.plotY, 1, a.x, a.y, a.z, a.value],
+								[b.plotX, b.plotY, 1, b.x, b.y, b.z, b.value],
+								[c.plotX, c.plotY, 1, c.x, c.y, c.z, c.value]]);
+							m.toReducedRowEchelonForm();
+							var interpolated = {
+								x:     axisRound(series.xAxis, m.mtx[0][3] * mx + m.mtx[1][3] * my + m.mtx[2][3]),
+								y:     axisRound(series.yAxis, m.mtx[0][4] * mx + m.mtx[1][4] * my + m.mtx[2][4]),
+								z:     axisRound(series.zAxis, m.mtx[0][5] * mx + m.mtx[1][5] * my + m.mtx[2][5]),
+								value:                         m.mtx[0][6] * mx + m.mtx[1][6] * my + m.mtx[2][6]
+							};
 
-						//interpolatedPoint.plotX = mx;
-						//interpolatedPoint.plotY = my;
-						var dataBackup = series.data;
-						series.data = [interpolatedPoint];
-						series.translate();
-						series.data = dataBackup;
+							//If the series has a dataFunction, use it to calculate
+							//an exact value at the Interpolated point
+							if (series.options.dataFunction) {
+								interpolated = series.dataFunction(interpolated);
+							}
 
-						chart.tooltip.refresh(interpolatedPoint, e);
-					} else {
-						var dist = function(P) {
-							return (P.plotX-mx)*(P.plotX-mx) + (P.plotY-my)*(P.plotY-my);
-						};
-						var nearest = triangle_data.A;
-						if (dist(triangle_data.B) < dist(nearest)) {
-							nearest = triangle_data.B;
+							var interpolatedPoint = new H.Point().init(series);
+							interpolatedPoint.applyOptions(interpolated);
+
+							//interpolatedPoint.plotX = mx;
+							//interpolatedPoint.plotY = my;
+							var dataBackup = series.data;
+							series.data = [interpolatedPoint];
+							series.translate();
+							series.data = dataBackup;
+
+							chart.tooltip.refresh(interpolatedPoint, e);
+						} else {
+							var dist = function(P) {
+								return (P.plotX-mx)*(P.plotX-mx) + (P.plotY-my)*(P.plotY-my);
+							};
+							var nearest = triangle_data.A;
+							if (dist(triangle_data.B) < dist(nearest)) {
+								nearest = triangle_data.B;
+							}
+							if (dist(triangle_data.C) < dist(nearest)) {
+								nearest = triangle_data.C;
+							}
+							nearest.onMouseOver(e);
 						}
-						if (dist(triangle_data.C) < dist(nearest)) {
-							nearest = triangle_data.C;
-						}
-						nearest.onMouseOver(e);
-					}
-				});
-				triangle_data.shape.add(triangle_data.group);
+					});
+					triangle_data.shape.add(triangle_data.group);
+				}
 			}
 
 
@@ -314,7 +315,7 @@
 			// Draw edges around the triangle and/or on contour curves
 
 			var edge_path = [];
-			if (show_edges) {
+			if (show_edges || show_triangles) {
 				var processEdge = function(a,b,A,B) {
 					if (!edgeCount[b + "-" + a]) {
 						if (edgeCount[a + "-" + b]-- == 1) {
@@ -322,6 +323,8 @@
 								"M", A.plotX, A.plotY,
 								"L", B.plotX, B.plotY);
 						}
+					} else if (show_triangles) {
+						edgeCount[a + "-" + b]--;
 					}
 				};
 				processEdge(triangle_data.a, triangle_data.b, triangle_data.A, triangle_data.B);
@@ -542,7 +545,7 @@
 
 			// Render each triangle
 			for (i=0; i<triangle_count; i++) {
-				series.drawTriangle(series.triangles[i], egde_count, options.showEdges, contours);
+				series.drawTriangle(series.triangles[i], egde_count, pick(options.showFaces, true), pick(options.showEdges, false), pick(options.showTriangles, false), contours);
 			}
 		}
 	});
