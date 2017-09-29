@@ -144,15 +144,6 @@
 			var c = triangle_data.C;
 			var abc = [a,b,c];
 
-
-			// SVG Group that holds everything
-			if (!triangle_data.group) {
-				triangle_data.group = renderer.g().add(this.surface_group);
-			}
-			triangle_data.group.attr({
-				zIndex: -(a.plotZ + b.plotZ + c.plotZ) / 3
-			});
-
 			if (show_faces) {
 				// Normalized values of the vertexes
 				var values = [
@@ -246,6 +237,11 @@
 						.attr({
 							fill: fill
 						});
+
+					if (triangle_data.shape.parent != triangle_data.group) {
+						triangle_data.shape.add(triangle_data.group);
+					}
+
 				} else {
 					triangle_data.shape = renderer.path(path).attr({
 						"shape-rendering": "crispEdges",
@@ -308,6 +304,9 @@
 					});
 					triangle_data.shape.add(triangle_data.group);
 				}
+			} else if (triangle_data.shape) {
+				triangle_data.shape.destroy;
+				delete triangle_data.shape;
 			}
 
 
@@ -363,6 +362,9 @@
 					triangle_data.edge.animate({
 						d: edge_path,
 					});
+					if (triangle_data.edge.parent != triangle_data.group) {
+						triangle_data.edge.add(triangle_data.group);
+					}
 				} else {
 					triangle_data.edge = renderer.path(edge_path)
 						.attr({
@@ -378,6 +380,52 @@
 			}
 		},
 
+		assignGroups: function() {
+			var series = this;
+			for (var i=0; i<series.triangles.length; i++) {
+				series.triangles[i].group_id = series.is3d ? i : 0;
+
+				series.triangles[i].group_id = Math.round(Math.random()*100);
+			}
+
+			//Add group on the SVG
+			var new_groups = {};
+			var old_groups = series.groups;
+
+			for (var i=0; i<series.triangles.length; i++) {
+				var triangle = series.triangles[i];
+				var group_id = triangle.group_id;
+
+				if (old_groups[group_id]) {
+					new_groups[group_id] = old_groups[group_id];
+					new_groups[group_id].zSum = 0;
+					new_groups[group_id].triangle_count = 0;
+					delete old_groups[group_id];
+				} else if (!new_groups[group_id]) {
+					new_groups[group_id] = series.chart.renderer.g().add(this.surface_group);
+					new_groups[group_id].zSum = 0;
+					new_groups[group_id].triangle_count = 0;
+				}
+
+				series.triangles[i].group = new_groups[group_id];
+				new_groups[group_id].zSum += triangle.A.plotZ + triangle.B.plotZ + triangle.C.plotZ;
+				new_groups[group_id].triangle_count++;
+			}
+
+			//Assign Z-Index of new groups as the mean Z of all triangles
+			H.objectEach(new_groups, function(group, group_id) {
+				group.attr({
+					zIndex: -group.zSum / (3*group.triangle_count)
+				});
+			});
+
+			//Remove old groups from SVG
+			H.objectEach(old_groups, function(group) {
+				group.destroy();
+			});
+			series.groups = new_groups;
+		},
+
 		drawGraph: function () {
 			var series = this,
 				i,j,
@@ -388,6 +436,7 @@
 			if (!series.surface_group) {
 				series.surface_group = renderer.g().add(series.group);
 				series.triangles = [];
+				series.groups = {};
 			}
 
 			// When creating a SVG, we create a "base" gradient with the right colors,
@@ -518,16 +567,23 @@
 
 			// Remove extra unused triangles from previous rendering
 			for (i=triangle_count; i<series.triangles.length; i++) {
-				if (series.triangles[i].group) {
-					series.triangles[i].group.destroy();
+				if (series.triangles[i].shape) {
+					series.triangles[i].shape.destroy();
+				}
+				if (series.triangles[i].edge) {
+					series.triangles[i].edge.destroy();
 				}
 				if (series.triangles[i].gradient) {
-					series.triangles[i].gradient.parentNode.removeChild(series.triangles[i].gradient);
+					series.triangles[i].gradient.destroy();
 				}
 			}
 			series.triangles.splice(triangle_count, series.triangles.length - triangle_count);
 
-
+			//Assign triangles in groups (drawing layers)
+			this.assignGroups();
+			H.objectEach(series.groups, function(group) {
+				group.edges = [];
+			});
 
 			var contours = [];
 			if (options.contours) {
