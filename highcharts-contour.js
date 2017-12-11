@@ -16,6 +16,7 @@
 	"use strict";
 
 	var defaultOptions = H.getOptions(),
+		defined = H.defined,
 		each = H.each,
 		find = H.find,
 		pick = H.pick,
@@ -100,25 +101,28 @@
 					axis1_type = pick(series.options.axis1, 'x'),
 					axis2_type = pick(series.options.axis1, this.is3d ? 'z' : 'y'),
 					axis1 = series[axis1_type + 'Axis'],
-					axis2 = series[axis2_type + 'Axis'],
-					axis1_min = pick(axis1.min, axis1.options.min),
-					axis2_min = pick(axis2.min, axis2.options.min),
-					axis1_max = pick(axis1.max, axis1.options.max),
-					axis2_max = pick(axis2.max, axis2.options.max),
-					axis1_steps = pick(series.options.grid_width, series.options.grid_height, 21),
-					axis2_steps = pick(series.options.grid_height, series.options.grid_width, 21),
-					data = [];
+					axis2 = series[axis2_type + 'Axis'];
 
-				for (var j=0; j<axis2_steps; j++) {
-					for (var i=0; i<axis1_steps; i++) {
-						var coord = {};
-						coord[axis1_type] = i / (axis1_steps - 1) * (axis1_max - axis1_min) + axis1_min;
-						coord[axis2_type] = j / (axis2_steps - 1) * (axis2_max - axis2_min) + axis2_min;
-						var point = this.dataFunction(coord);
-						data.push(point);
+				if (defined(axis1.min) && defined(axis1.max) && defined(axis2.min) && defined(axis2.max)) {
+					var axis1_min = pick(axis1.min, axis1.options.min),
+						axis2_min = pick(axis2.min, axis2.options.min),
+						axis1_max = pick(axis1.max, axis1.options.max),
+						axis2_max = pick(axis2.max, axis2.options.max),
+						axis1_steps = pick(series.options.grid_width, series.options.grid_height, 21),
+						axis2_steps = pick(series.options.grid_height, series.options.grid_width, 21),
+						data = [];
+
+					for (var j=0; j<axis2_steps; j++) {
+						for (var i=0; i<axis1_steps; i++) {
+							var coord = {};
+							coord[axis1_type] = i / (axis1_steps - 1) * (axis1_max - axis1_min) + axis1_min;
+							coord[axis2_type] = j / (axis2_steps - 1) * (axis2_max - axis2_min) + axis2_min;
+							var point = this.dataFunction(coord);
+							data.push(point);
+						}
 					}
+					arguments[0] = data;
 				}
-				arguments[0] = data;
 				return seriesTypes.scatter.prototype.setData.apply(this, arguments);
 			}
 		},
