@@ -537,7 +537,7 @@
 						var i10 = ( i )*grid_width + (j-1);
 						var i11 = ( i )*grid_width + ( j );
 
-						if (Math.abs(points[i00].value - points[i11].value) < Math.abs(points[i01].value - points[i10].value)) {
+						if (this.is3d && Math.abs(points[i00].value - points[i11].value) < Math.abs(points[i01].value - points[i10].value)) {
 							triangles.push(i00, i01, i11);
 							triangles.push(i00, i11, i10);
 						} else {
