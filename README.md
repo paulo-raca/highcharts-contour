@@ -16,8 +16,7 @@ If you specify a discrete list of points, the surface can be triangulated in 3 w
 
 Demos
 =====
-
-[Heatmap demo](https://jsfiddle.net/8kk6ggtq/)
+[Heatmap demo](https://jsfiddle.net/a4uxsy7L/)
 --------------------
 
 This is the same demo you can find for Highcharts Heatmap, but chart type was changed to 'contour', and you can toggle contour lines on each axis.
@@ -25,7 +24,7 @@ This is the same demo you can find for Highcharts Heatmap, but chart type was ch
 Note that it automatically uses Delaunay for triangulation, no extra effort required ;)
 
 
-[2-D Curve Plot](https://jsfiddle.net/8rfhvdvr/)
+[2-D Curve Plot](https://jsfiddle.net/x3ejvu0L/)
 ------------------------
 This demo uses the built-in suport for evaluating a `dataFunction`: The points are evaluated in a regular grid and produce a 2D chart.
 
@@ -35,31 +34,31 @@ Extras:
 - Tooltip can be extrapolated for any point in the chart, not only the points used for rendering.
 
 
-[2-D Curve Plot with contour axis labels](https://jsfiddle.net/ag636fyc/)
+[2-D Curve Plot with contour axis labels](https://jsfiddle.net/yjh9n6vk/)
 ------------------------
 This example augments the 2-D Curve Plot demo with extra axes that display the values of the contour curves.
 
 
-[3-D Curve Plot](https://jsfiddle.net/d1aqhg22/)
+[3-D Curve Plot](https://jsfiddle.net/k3j9tzLv/)
 --------------------
 This is equivalent to the 2-D Curve Plot demo, in 3D.
 
 On this example, Both Y and Color axes store the same values, a trick that makes visualization easier.
 
 
-[3-D Curve Plot #2](https://jsfiddle.net/nt5qo55v/)
+[3-D Curve Plot #2](https://jsfiddle.net/ks2pa1oq/)
 --------------------
 Similar to the previous demo, but Y and Color axes have indenpendent values.
 
 
-[Random Point locations](https://jsfiddle.net/nd49scnx/)
+[Random Point locations](https://jsfiddle.net/9nxgswLd/)
 ------------------------
 This demo plots a radial function, but the locations of the data points are spread randomly.
 
 You can create a good chart even when you cannot sample your data in a rectangular grid
 
 
-[Random Data demo](https://jsfiddle.net/naq8uwLL/)
+[Random Data demo](https://jsfiddle.net/5jk3s4x1/)
 --------------------
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
 
