@@ -102,7 +102,6 @@
 				axis2 = series[axis2_type + 'Axis'];
 
 			if (!series.options.dataFunction || !defined(axis1.min) || !defined(axis1.max) || !defined(axis2.min) || !defined(axis2.max)) {
-				console.log("updateDataIfNecessary: abort");
 				return;
 			}
 
@@ -167,13 +166,16 @@
 			if (show_faces) {
 				// Normalized values of the vertexes
 				var values = [
-					this.colorAxis.normalizedValue(a.value),
-					this.colorAxis.normalizedValue(b.value),
-					this.colorAxis.normalizedValue(c.value)
-				];
+						this.colorAxis.normalizedValue(a.value),
+						this.colorAxis.normalizedValue(b.value),
+						this.colorAxis.normalizedValue(c.value)
+					],
+					maxValue = Math.max(values[0], values[1], values[2]),
+					minValue = Math.min(values[0], values[1], values[2]),
+					triangleArea = Math.abs(a.plotX * (b.plotY - c.plotY) + b.plotX * (c.plotY - a.plotY) + c.plotX * (a.plotY - b.plotY)) / 2;
 
-				// All vertexes have the same value/color
-				if (Math.abs(values[0] - values[1]) < eps && Math.abs(values[0] - values[2]) < eps) {
+				// All vertexes have the same value/color, or the triangle has a zero-ish area
+				if (((maxValue - minValue) < eps) || (triangleArea < eps)) {
 					fill = this.colorAxis.toColor((a.value + b.value + c.value) / 3);
 				// Use a linear gradient to interpolate values/colors
 				} else {
@@ -196,10 +198,10 @@
 					// k = (Value - C) / (A² + B²)
 					var k0 = (0-C) / (A*A + B*B);
 					var k1 = (1-C) / (A*A + B*B);
-					var x1 = k0*A;
-					var y1 = k0*B;
-					var x2 = k1*A;
-					var y2 = k1*B;
+					var x1 = ensureDecimal(k0*A);
+					var y1 = ensureDecimal(k0*B);
+					var x2 = ensureDecimal(k1*A);
+					var y2 = ensureDecimal(k1*B);
 
 					// Assign a linear gradient that interpolates all 3 vertexes
 					if (renderer.isSVG) {
@@ -660,7 +662,15 @@
 		}
 	});
 
-
+	/**
+	 * Round tiny numbers to 0, as scientific notation isn't handled by SVG
+	 */
+	var ensureDecimal = function(num) {
+		if ((num >= -1e-6) && (num <= 1e-6)) {
+			return 0;
+		}
+		return num;
+	}
 
 	/**
 	 * Smart-rounding of axis values, where the precision depends on the axis slope.
