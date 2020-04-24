@@ -172,10 +172,10 @@
 					],
 					maxValue = Math.max(values[0], values[1], values[2]),
 					minValue = Math.min(values[0], values[1], values[2]),
-					triangleArea = Math.abs(a.plotX * (b.plotY - c.plotY) + b.plotX * (c.plotY - a.plotY) + c.plotX * (a.plotY - b.plotY)) / 2;
+					area = Math.abs(triangleArea(a, b, c));
 
 				// All vertexes have the same value/color, or the triangle has a zero-ish area
-				if (((maxValue - minValue) < eps) || (triangleArea < eps)) {
+				if (((maxValue - minValue) < eps) || (area < eps)) {
 					fill = this.colorAxis.toColor((a.value + b.value + c.value) / 3);
 				// Use a linear gradient to interpolate values/colors
 				} else {
@@ -503,12 +503,8 @@
 					if (series.is3d) {
 						// Ensure all triangles are counter-clockwise.
 						// This is used to detect "3D wrap-around" edges.
-						var triangleArea = H.shapeArea([
-								{x:points[a].plotX, y:points[a].plotY},
-								{x:points[b].plotX, y:points[b].plotY},
-								{x:points[c].plotX, y:points[c].plotY}
-							]);
-						if (triangleArea < 0) {
+						var area = triangleArea(points[a], points[b], points[c]);
+						if (area < 0) {
 							var tmp = a;
 							a = b;
 							b = tmp;
@@ -661,6 +657,10 @@
 			});
 		}
 	});
+
+    var triangleArea = function(a, b, c) {
+        return (a.plotX * (b.plotY - c.plotY) + b.plotX * (c.plotY - a.plotY) + c.plotX * (a.plotY - b.plotY)) / 2;
+    }
 
 	/**
 	 * Round tiny numbers to 0, as scientific notation isn't handled by SVG
