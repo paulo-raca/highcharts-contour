@@ -553,7 +553,7 @@
 				triangles = Delaunay.triangulate(points.map(
 					this.is3d ?
 					function(x) {
-						return [x.plotXold, x.plotZold];
+						return [x.axisXpos, x.axisZpos];
 					} : function(x) {
 						return [x.plotX, x.plotY];
 					}));
