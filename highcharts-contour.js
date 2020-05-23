@@ -762,14 +762,6 @@
 	* Contour axis
 	* Just add an extra axis with `contourAxis: true` and it will display labels for 'value' at the intersection with the contour curves
 	*/
-	H.Axis.prototype.defaultOptions.contourAxis = {
-		//tickColor: 'black',
-		tickWidth: 1,
-		tickColor: 'black',
-		title: {
-			text: null
-		},
-	};
 
 	var contourAxisGetCoordinate = function (axis, pixels) {
 		var x, y;
@@ -843,14 +835,21 @@
 	wrap(H.Axis.prototype, 'setOptions', function(proceed, userOptions) {
 		if (userOptions.contourAxis) {
 			userOptions = merge(
-				this.defaultOptions.contourAxis,
-				merge(userOptions, {
+				{
+					tickWidth: 1,
+					tickColor: 'black',
+					title: {
+						text: null
+					},
+				},
+				userOptions,
+				{
 					min: 0,
 					max: 1,
 					startOnTick: false,
 					endOnTick: false,
 					tickPositioner: contourAxisTickPositioner
-				}));
+				});
 		}
 
 		return proceed.call(this, userOptions);
