@@ -124,7 +124,7 @@
 				"axis2_steps": axis2_steps,
 			}
 			var changes = H.cleanRecursively(newDataFuncState, series.dataFuncState);
-			if (H.keys(changes).length === 0) {
+			if (Object.keys(changes).length === 0) {
 				return;
 			}
 			series.dataFuncState = newDataFuncState;
