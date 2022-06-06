@@ -25,6 +25,7 @@
 		seriesTypes = H.seriesTypes,
 		wrap = H.wrap,
 		perspective = H.perspective,
+		cleanRecursively = H._modules['Core/Utilities.js'].cleanRecursively,
 		eps = 0.0001,
 		SVG_NS = "http://www.w3.org/2000/svg",
 		XLINK_NS = "http://www.w3.org/1999/xlink",
@@ -123,10 +124,10 @@
 				"axis1_steps": axis1_steps,
 				"axis2_steps": axis2_steps,
 			}
-			var changes = H.cleanRecursively(newDataFuncState, series.dataFuncState);
-			if (Object.keys(changes).length === 0) {
-				return;
-			}
+ 			var changes = cleanRecursively(newDataFuncState, series.dataFuncState);
+ 			if (Object.keys(changes).length === 0) {
+ 				return;
+ 			}
 			series.dataFuncState = newDataFuncState;
 
 			var data = [];
@@ -564,7 +565,7 @@
 				}
 			} else {
 				//If points are not in a regular grid, use Delaunay triangulation.
-				//You will have to include this: https://github.com/ironwallaby/delaunay
+				//You will have to include this: https://github.com/darkskyapp/delaunay-fast
 				points = points.filter(validatePoint);
 				triangles = Delaunay.triangulate(points.map(
 					this.is3d ?
