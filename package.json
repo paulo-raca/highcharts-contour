@@ -4,7 +4,7 @@
         "LICENSE"
     ],
     "name": "highcharts-contour",
-    "version": "1.9.1",
+    "version": "1.9.2",
     "description": "Displays contour curves from math functions and sampled data.",
     "main": "highcharts-contour.js",
     "repository": {
@@ -18,14 +18,14 @@
         "highcharts-addon"
     ],
     "demo": [
-        "https://jsfiddle.net/wu5ny61a/",
-        "https://jsfiddle.net/ocfajhpm/",
-        "https://jsfiddle.net/Lp0u2ohx/",
-        "https://jsfiddle.net/ts8uryj3/",
-        "https://jsfiddle.net/rk96bsda/",
-        "https://jsfiddle.net/poe7k6uf/",
-        "https://jsfiddle.net/z9abdwg7/",
-        "https://jsfiddle.net/7039q1pu/"
+        "https://jsfiddle.net/cnft1xog/",
+        "https://jsfiddle.net/e08kmdwh/",
+        "https://jsfiddle.net/0Ljcotw8/",
+        "https://jsfiddle.net/zpxaws8g/",
+        "https://jsfiddle.net/eL3yzpq0/",
+        "https://jsfiddle.net/aznt8vh6/",
+        "https://jsfiddle.net/xsyzo2fq/",
+        "https://jsfiddle.net/1gjzca60/"
     ],
     "author": "Paulo Costa <eu@paulo.costa.nom.br>",
     "license" : "Unlicense",

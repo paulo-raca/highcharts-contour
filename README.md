@@ -16,7 +16,7 @@ If you specify a discrete list of points, the surface can be triangulated in 3 w
 
 Demos
 =====
-[Heatmap demo](https://jsfiddle.net/wu5ny61a/)
+[Heatmap demo](https://jsfiddle.net/cnft1xog/)
 --------------------
 
 This is the same demo you can find for Highcharts Heatmap, but chart type was changed to 'contour', and you can toggle contour lines on each axis.
@@ -24,7 +24,7 @@ This is the same demo you can find for Highcharts Heatmap, but chart type was ch
 Note that it automatically uses Delaunay for triangulation, no extra effort required ;)
 
 
-[2-D Curve Plot](https://jsfiddle.net/ocfajhpm/)
+[2-D Curve Plot](https://jsfiddle.net/e08kmdwh/)
 ------------------------
 This demo uses the built-in suport for evaluating a `dataFunction`: The points are evaluated in a regular grid and produce a 2D chart.
 
@@ -34,35 +34,35 @@ Extras:
 - Tooltip can be extrapolated for any point in the chart, not only the points used for rendering.
 
 
-[2-D Curve Plot with contour axis labels](https://jsfiddle.net/Lp0u2ohx/)
+[2-D Curve Plot with contour axis labels](https://jsfiddle.net/0Ljcotw8/)
 ------------------------
 This example augments the 2-D Curve Plot demo with extra axes that display the values of the contour curves.
 
 
-[3-D Curve Plot](https://jsfiddle.net/ts8uryj3/)
+[3-D Curve Plot](https://jsfiddle.net/zpxaws8g/)
 --------------------
 This is equivalent to the 2-D Curve Plot demo, in 3D.
 
 On this example, Both Y and Color axes store the same values, a trick that makes visualization easier.
 
 
-[3-D Curve Plot #2](https://jsfiddle.net/rk96bsda/)
+[3-D Curve Plot #2](https://jsfiddle.net/eL3yzpq0/)
 --------------------
-Similar to the previous demo, but Y and Color axes have indenpendent values.
+Similar to the previous demo, but Y and Color axes have independent values.
 
 
-[Random Point locations](https://jsfiddle.net/poe7k6uf/)
+[Random Point locations](https://jsfiddle.net/aznt8vh6/)
 ------------------------
 This demo plots a radial function, but the locations of the data points are spread randomly.
 
 You can create a good chart even when you cannot sample your data in a rectangular grid
 
 
-[Random Data demo](https://jsfiddle.net/z9abdwg7/)
+[Random Data demo](https://jsfiddle.net/xsyzo2fq/)
 --------------------
 This demo uses random data to show that your points don't need to make sense to create pretty chart :P
 
 
-[Utah Teapot / OBJ Reader](https://jsfiddle.net/7039q1pu/)
+[Utah Teapot / OBJ Reader](https://jsfiddle.net/1gjzca60/)
 --------------------
 This is a just-for-fun extra: Since this plugin can draw surfaces in 3D, why not use it to render the Utah Teapot from an OBJ file?!
