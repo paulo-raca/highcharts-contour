@@ -8,8 +8,8 @@
     },
     "licenses": [
         {
-            "type": "WTFPL – Do What the Fuck You Want to Public License",
-            "url": "http://www.wtfpl.net/"
+            "type": "The Unlicense",
+            "url": "https://unlicense.org/"
         }
     ],
     "dependencies": {
