@@ -1,0 +1,40 @@
+{
+    "files": [
+        "highcharts-contour.js",
+        "LICENSE"
+    ],
+    "name": "highcharts-contour",
+    "version": "1.9.0",
+    "description": "Displays contour curves from math functions and sampled data.",
+    "main": "highcharts-contour.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/paulo-raca/highcharts-contour.git"
+    },
+    "keywords": [
+        "heatmap",
+        "contour",
+        "highcharts",
+        "highcharts-addon"
+    ],
+    "demo": [
+        "https://jsfiddle.net/wu5ny61a/",
+        "https://jsfiddle.net/ocfajhpm/",
+        "https://jsfiddle.net/Lp0u2ohx/",
+        "https://jsfiddle.net/ts8uryj3/",
+        "https://jsfiddle.net/rk96bsda/",
+        "https://jsfiddle.net/poe7k6uf/",
+        "https://jsfiddle.net/z9abdwg7/",
+        "https://jsfiddle.net/7039q1pu/"
+    ],
+    "author": "Paulo Costa <eu@paulo.costa.nom.br>",
+    "license" : "Unlicense",
+    "bugs": {
+        "url": "https://github.com/paulo-raca/highcharts-contour/issues"
+    },
+    "homepage": "https://github.com/paulo-raca/highcharts-contour#readme",
+    "dependencies": {
+        "highcharts": ">=9.0.0",
+        "delaunay-fast": ">=1.0.1"
+    }
+}
