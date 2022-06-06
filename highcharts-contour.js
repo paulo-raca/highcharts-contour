@@ -860,8 +860,8 @@
 	wrap(H.Axis.prototype, 'init', function(proceed, chart, options) {
 		proceed.apply(this, [].slice.call(arguments, 1));
 		if (this.options.tickPositioner === contourAxisTickPositioner) {
-			var oldFormatter = this.labelFormatter;
-			this.labelFormatter = function() {
+			var oldFormatter = this.defaultLabelFormatter;
+			this.defaultLabelFormatter = function() {
 				this.value = this.axis._contourAxisLabels[this.value];
 				return oldFormatter.call(this);
 			};

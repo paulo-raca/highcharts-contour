@@ -4,7 +4,7 @@
         "LICENSE"
     ],
     "name": "highcharts-contour",
-    "version": "1.9.0",
+    "version": "1.9.1",
     "description": "Displays contour curves from math functions and sampled data.",
     "main": "highcharts-contour.js",
     "repository": {
