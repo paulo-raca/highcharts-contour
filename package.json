@@ -4,7 +4,7 @@
         "LICENSE"
     ],
     "name": "highcharts-contour",
-    "version": "1.9.2",
+    "version": "1.10.0",
     "description": "Displays contour curves from math functions and sampled data.",
     "main": "highcharts-contour.js",
     "repository": {
@@ -34,7 +34,10 @@
     },
     "homepage": "https://github.com/paulo-raca/highcharts-contour#readme",
     "dependencies": {
-        "highcharts": ">=9.0.0",
-        "delaunay-fast": ">=1.0.1"
+        "highcharts": ">=9.0.0"
+    },
+    "optionalDependencies": {
+        "delaunay-fast": ">=1.0.1",
+        "cdt2d": ">=1.0.0"
     }
 }

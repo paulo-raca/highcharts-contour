@@ -564,16 +564,36 @@
 					}
 				}
 			} else {
-				//If points are not in a regular grid, use Delaunay triangulation.
-				//You will have to include this: https://github.com/darkskyapp/delaunay-fast
-				points = points.filter(validatePoint);
-				triangles = Delaunay.triangulate(points.map(
-					this.is3d ?
-					function(x) {
-						return [x.axisXpos, x.axisZpos];
-					} : function(x) {
-						return [x.plotX, x.plotY];
-					}));
+				// If points are not in a regular grid, use Delaunay triangulation.
+				// You will have to include this: https://github.com/darkskyapp/delaunay-fast
+				var transformed_points = []
+				var transformed_points_indexes = {}
+				points.forEach(function(point, i) {
+					if (!validatePoint(point)) {
+						return;
+					}
+					if (series.is3d) {
+						var transformed_point = [point.axisXpos, point.axisZpos];
+					} else {
+						var transformed_point = [point.plotX, point.plotY];
+					}
+					transformed_points_indexes[i] = transformed_points.length;
+					transformed_points.push(transformed_point);
+				});
+
+				var delaunay_edges = [];
+				var outer_edges = options.outer_edges || [];
+				outer_edges.forEach(function(edge) {
+					if (edge[0] in transformed_points && edge[1] in transformed_points) {
+						delaunay_edges.push([ transformed_points_indexes[edge[0]], transformed_points_indexes[edge[1]] ]);
+					}
+				});
+
+				if (options.cdt2d || delaunay_edges.length != 0 || !window.Delaunay) {
+					triangles = cdt2d(transformed_points, delaunay_edges, options.cdt2d).flat();
+				} else {
+					triangles = Delaunay.triangulate(transformed_points);
+				}
 			}
 
 			for (i=0; i<triangles.length-2; i+=3) {
