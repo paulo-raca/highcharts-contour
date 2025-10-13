@@ -25,7 +25,9 @@
         seriesTypes = H.seriesTypes,
         wrap = H.wrap,
         perspective = H.perspective,
-        diffObjects = H._modules["Core/Utilities.js"].diffObjects || H._modules["Core/Utilities.js"].cleanRecursively,
+        diffObjects =
+            H._modules["Core/Utilities.js"].diffObjects ||
+            H._modules["Core/Utilities.js"].cleanRecursively,
         eps = 0.0001,
         SVG_NS = "http://www.w3.org/2000/svg",
         XLINK_NS = "http://www.w3.org/1999/xlink",
@@ -35,29 +37,35 @@
      * Extend the default options with map options
      */
 
-    defaultOptions.plotOptions.contour = merge(defaultOptions.plotOptions.scatter, {
-        marker: {
-            radius: 0,
-            fillColor: "#ffffff",
+    defaultOptions.plotOptions.contour = merge(
+        defaultOptions.plotOptions.scatter,
+        {
+            marker: {
+                radius: 0,
+                fillColor: "#ffffff",
+                states: {
+                    hover: {
+                        radius: defaultOptions.plotOptions.scatter.marker
+                            .radius,
+                    },
+                },
+            },
             states: {
                 hover: {
-                    radius: defaultOptions.plotOptions.scatter.marker.radius,
-                },
-            },
-        },
-        states: {
-            hover: {
-                halo: {
-                    size: defaultOptions.plotOptions.scatter.marker.radius + 4,
-                    attributes: {
-                        fill: "#000000",
+                    halo: {
+                        size:
+                            defaultOptions.plotOptions.scatter.marker.radius +
+                            4,
+                        attributes: {
+                            fill: "#000000",
+                        },
+                        opacity: 0.5,
                     },
-                    opacity: 0.5,
                 },
             },
+            turboThreshold: 0,
         },
-        turboThreshold: 0,
-    });
+    );
 
     // The Heatmap series type
     seriesTypes.contour = extendClass(seriesTypes.heatmap, {
@@ -85,7 +93,8 @@
             if (typeof result === "number") {
                 var ret = {};
                 each(this.parallelArrays, function (axis) {
-                    ret[axis] = axis === "value" ? result : pick(coord[axis], result);
+                    ret[axis] =
+                        axis === "value" ? result : pick(coord[axis], result);
                 });
                 return ret;
             } else if (typeof result === "object") {
@@ -98,7 +107,10 @@
         updateDataIfNecessary: function () {
             var series = this,
                 axis1_type = pick(series.options.axis1, "x"),
-                axis2_type = pick(series.options.axis2, series.is3d ? "z" : "y"),
+                axis2_type = pick(
+                    series.options.axis2,
+                    series.is3d ? "z" : "y",
+                ),
                 axis1 = series[axis1_type + "Axis"],
                 axis2 = series[axis2_type + "Axis"];
 
@@ -116,8 +128,16 @@
                 axis2_min = pick(axis2.min, axis2.options.min),
                 axis1_max = pick(axis1.max, axis1.options.max),
                 axis2_max = pick(axis2.max, axis2.options.max),
-                axis1_steps = pick(series.options.grid_width, series.options.grid_height, 21),
-                axis2_steps = pick(series.options.grid_height, series.options.grid_width, 21);
+                axis1_steps = pick(
+                    series.options.grid_width,
+                    series.options.grid_height,
+                    21,
+                ),
+                axis2_steps = pick(
+                    series.options.grid_height,
+                    series.options.grid_width,
+                    21,
+                );
 
             var newDataFuncState = {
                 dataFunc: series.options.dataFunction,
@@ -140,13 +160,23 @@
             for (var j = 0; j < axis2_steps; j++) {
                 for (var i = 0; i < axis1_steps; i++) {
                     var coord = {};
-                    coord[axis1_type] = (i / (axis1_steps - 1)) * (axis1_max - axis1_min) + axis1_min;
-                    coord[axis2_type] = (j / (axis2_steps - 1)) * (axis2_max - axis2_min) + axis2_min;
+                    coord[axis1_type] =
+                        (i / (axis1_steps - 1)) * (axis1_max - axis1_min) +
+                        axis1_min;
+                    coord[axis2_type] =
+                        (j / (axis2_steps - 1)) * (axis2_max - axis2_min) +
+                        axis2_min;
                     var point = this.dataFunction(coord);
                     data.push(point);
                 }
             }
-            return seriesTypes.scatter.prototype.setData.call(this, data, true, false, false);
+            return seriesTypes.scatter.prototype.setData.call(
+                this,
+                data,
+                true,
+                false,
+                false,
+            );
         },
 
         bindAxes: function () {
@@ -160,7 +190,14 @@
             seriesTypes.scatter.prototype.bindAxes.apply(this, arguments);
         },
 
-        drawTriangle: function (triangle_data, edgeCount, show_faces, show_edges, show_triangles, contours) {
+        drawTriangle: function (
+            triangle_data,
+            edgeCount,
+            show_faces,
+            show_edges,
+            show_triangles,
+            contours,
+        ) {
             var fill;
             var series = this;
             var chart = this.chart;
@@ -183,7 +220,9 @@
 
                 // All vertexes have the same value/color, or the triangle has a zero-ish area
                 if (maxValue - minValue < eps || area < eps) {
-                    fill = this.colorAxis.toColor((a.value + b.value + c.value) / 3);
+                    fill = this.colorAxis.toColor(
+                        (a.value + b.value + c.value) / 3,
+                    );
                     // Use a linear gradient to interpolate values/colors
                 } else {
                     // Find function where "Value = A*X + B*Y + C" at the 3 vertexes
@@ -234,8 +273,17 @@
                                 y2: y2,
                             });
                         }
-                        gradient.element.setAttributeNS(XLINK_NS, "xlink:href", this.base_gradient_id);
-                        fill = "url(" + renderer.url + "#" + gradient.attr("id") + ")";
+                        gradient.element.setAttributeNS(
+                            XLINK_NS,
+                            "xlink:href",
+                            this.base_gradient_id,
+                        );
+                        fill =
+                            "url(" +
+                            renderer.url +
+                            "#" +
+                            gradient.attr("id") +
+                            ")";
                     } else {
                         fill = {
                             linearGradient: {
@@ -251,7 +299,12 @@
                     }
                 }
 
-                var path = ["M", a.plotX, a.plotY, "L", b.plotX, b.plotY, "L", c.plotX, c.plotY, "Z"];
+                var path = [
+                    "M", a.plotX, a.plotY,
+                    "L", b.plotX, b.plotY,
+                    "L", c.plotX, c.plotY,
+                    "Z",
+                ];
 
                 if (triangle_data.shape) {
                     triangle_data.shape
@@ -273,8 +326,10 @@
                     triangle_data.shape.on("mousemove", function (e) {
                         e = chart.pointer.normalize(e);
                         if (chart.inverted) {
-                            var mx = chart.plotTop + chart.plotHeight - e.chartY;
-                            var my = chart.plotLeft + chart.plotWidth - e.chartX;
+                            var mx =
+                                chart.plotTop + chart.plotHeight - e.chartY;
+                            var my =
+                                chart.plotLeft + chart.plotWidth - e.chartX;
                         } else {
                             var mx = e.chartX - chart.plotLeft;
                             var my = e.chartY - chart.plotTop;
@@ -289,16 +344,35 @@
                             ]);
                             m.toReducedRowEchelonForm();
                             var interpolated = {
-                                x: axisRound(series.xAxis, m.mtx[0][3] * mx + m.mtx[1][3] * my + m.mtx[2][3]),
-                                y: axisRound(series.yAxis, m.mtx[0][4] * mx + m.mtx[1][4] * my + m.mtx[2][4]),
-                                z: axisRound(series.zAxis, m.mtx[0][5] * mx + m.mtx[1][5] * my + m.mtx[2][5]),
-                                value: m.mtx[0][6] * mx + m.mtx[1][6] * my + m.mtx[2][6],
+                                x: axisRound(
+                                    series.xAxis,
+                                    m.mtx[0][3] * mx +
+                                        m.mtx[1][3] * my +
+                                        m.mtx[2][3],
+                                ),
+                                y: axisRound(
+                                    series.yAxis,
+                                    m.mtx[0][4] * mx +
+                                        m.mtx[1][4] * my +
+                                        m.mtx[2][4],
+                                ),
+                                z: axisRound(
+                                    series.zAxis,
+                                    m.mtx[0][5] * mx +
+                                        m.mtx[1][5] * my +
+                                        m.mtx[2][5],
+                                ),
+                                value:
+                                    m.mtx[0][6] * mx +
+                                    m.mtx[1][6] * my +
+                                    m.mtx[2][6],
                             };
 
                             //If the series has a dataFunction, use it to calculate
                             //an exact value at the Interpolated point
                             if (series.options.dataFunction) {
-                                interpolated = series.dataFunction(interpolated);
+                                interpolated =
+                                    series.dataFunction(interpolated);
                             }
 
                             var interpolatedPoint = new H.Point().init(series);
@@ -314,7 +388,10 @@
                             chart.tooltip.refresh(interpolatedPoint, e);
                         } else {
                             var dist = function (P) {
-                                return (P.plotX - mx) * (P.plotX - mx) + (P.plotY - my) * (P.plotY - my);
+                                return (
+                                    (P.plotX - mx) * (P.plotX - mx) +
+                                    (P.plotY - my) * (P.plotY - my)
+                                );
                             };
                             var nearest = triangle_data.A;
                             if (dist(triangle_data.B) < dist(nearest)) {
@@ -342,19 +419,44 @@
                 var processEdge = function (a, b, A, B) {
                     if (!edgeCount[b + "-" + a]) {
                         if (edgeCount[a + "-" + b]-- == 1) {
-                            edge_path.push("M", A.plotX, A.plotY, "L", B.plotX, B.plotY);
-                            edge_path_old.push("M", A.plotX_prev, A.plotY_prev, "L", B.plotX_prev, B.plotY_prev);
+                            edge_path.push(
+                                "M", A.plotX, A.plotY,
+                                "L", B.plotX, B.plotY,
+                            );
+                            edge_path_old.push(
+                                "M", A.plotX_prev, A.plotY_prev,
+                                "L", B.plotX_prev, B.plotY_prev,
+                            );
                         }
                     } else if (show_triangles) {
                         edgeCount[a + "-" + b]--;
                     }
                 };
-                processEdge(triangle_data.a, triangle_data.b, triangle_data.A, triangle_data.B);
-                processEdge(triangle_data.b, triangle_data.c, triangle_data.B, triangle_data.C);
-                processEdge(triangle_data.c, triangle_data.a, triangle_data.C, triangle_data.A);
+                processEdge(
+                    triangle_data.a,
+                    triangle_data.b,
+                    triangle_data.A,
+                    triangle_data.B,
+                );
+                processEdge(
+                    triangle_data.b,
+                    triangle_data.c,
+                    triangle_data.B,
+                    triangle_data.C,
+                );
+                processEdge(
+                    triangle_data.c,
+                    triangle_data.a,
+                    triangle_data.C,
+                    triangle_data.A,
+                );
             }
 
-            for (var contour_index = 0; contour_index < contours.length; contour_index++) {
+            for (
+                var contour_index = 0;
+                contour_index < contours.length;
+                contour_index++
+            ) {
                 var contourAxis = contours[contour_index].axis;
                 var contourAttr = contours[contour_index].attr;
 
@@ -373,7 +475,11 @@
                             y2_prev = abc[(i + 1) % 3].plotY_prev,
                             v2 = abc[(i + 1) % 3][contourAttr];
 
-                        if (v1 != v2 && tickValue >= Math.min(v1, v2) && tickValue < Math.max(v1, v2)) {
+                        if (
+                            v1 != v2 &&
+                            tickValue >= Math.min(v1, v2) &&
+                            tickValue < Math.max(v1, v2)
+                        ) {
                             var q = (tickValue - v1) / (v2 - v1);
                             contourVertexes.push([
                                 q * (x2 - x1) + x1,
@@ -390,7 +496,7 @@
                             contourVertexes[0][1],
                             "L",
                             contourVertexes[1][0],
-                            contourVertexes[1][1]
+                            contourVertexes[1][1],
                         );
                         edge_path_old.push(
                             "M",
@@ -398,7 +504,7 @@
                             contourVertexes[0][3],
                             "L",
                             contourVertexes[1][2],
-                            contourVertexes[1][3]
+                            contourVertexes[1][3],
                         );
                     }
                 }
@@ -427,13 +533,16 @@
                     new_groups[group_id].triangle_count = 0;
                     delete old_groups[group_id];
                 } else if (!new_groups[group_id]) {
-                    new_groups[group_id] = series.chart.renderer.g().add(this.surface_group);
+                    new_groups[group_id] = series.chart.renderer
+                        .g()
+                        .add(this.surface_group);
                     new_groups[group_id].zSum = 0;
                     new_groups[group_id].triangle_count = 0;
                 }
 
                 series.triangles[i].group = new_groups[group_id];
-                new_groups[group_id].zSum += triangle.A.plotZ + triangle.B.plotZ + triangle.C.plotZ;
+                new_groups[group_id].zSum +=
+                    triangle.A.plotZ + triangle.B.plotZ + triangle.C.plotZ;
                 new_groups[group_id].triangle_count++;
             }
 
@@ -477,20 +586,24 @@
                     }
                 }
                 if (!this.gradiend_ids[gradiend_id]) {
-                    var fake_rect = series.chart.renderer.rect(0, 0, 1, 1).attr({
-                        fill: {
-                            linearGradient: {
-                                x1: 0,
-                                y1: 0,
-                                x2: 1,
-                                y2: 0,
-                                spreadMethod: "pad",
-                                gradientUnits: "userSpaceOnUse",
+                    var fake_rect = series.chart.renderer
+                        .rect(0, 0, 1, 1)
+                        .attr({
+                            fill: {
+                                linearGradient: {
+                                    x1: 0,
+                                    y1: 0,
+                                    x2: 1,
+                                    y2: 0,
+                                    spreadMethod: "pad",
+                                    gradientUnits: "userSpaceOnUse",
+                                },
+                                stops: this.colorAxis.stops,
                             },
-                            stops: this.colorAxis.stops,
-                        },
-                    });
-                    this.gradiend_ids[gradiend_id] = /(#.*)[)]/.exec(fake_rect.attr("fill"))[1];
+                        });
+                    this.gradiend_ids[gradiend_id] = /(#.*)[)]/.exec(
+                        fake_rect.attr("fill"),
+                    )[1];
                 }
                 this.base_gradient_id = this.gradiend_ids[gradiend_id];
             }
@@ -512,11 +625,19 @@
                 egde_count[a + "-" + b] = (egde_count[a + "-" + b] || 0) + 1;
             };
             var appendTriangle = function (a, b, c) {
-                if (validatePoint(points[a]) && validatePoint(points[b]) && validatePoint(points[c])) {
+                if (
+                    validatePoint(points[a]) &&
+                    validatePoint(points[b]) &&
+                    validatePoint(points[c])
+                ) {
                     if (series.is3d) {
                         // Ensure all triangles are counter-clockwise.
                         // This is used to detect "3D wrap-around" edges.
-                        var area = triangleArea(points[a], points[b], points[c]);
+                        var area = triangleArea(
+                            points[a],
+                            points[b],
+                            points[c],
+                        );
                         if (area < 0) {
                             var tmp = a;
                             a = b;
@@ -563,7 +684,12 @@
                 //points are in a nice regular grid
                 var grid_width = options.grid_width;
                 for (i = 1; i < points.length / grid_width; i++) {
-                    for (j = 1; j < options.grid_width && i * grid_width + j < points.length; j++) {
+                    for (
+                        j = 1;
+                        j < options.grid_width &&
+                        i * grid_width + j < points.length;
+                        j++
+                    ) {
                         var i00 = (i - 1) * grid_width + (j - 1);
                         var i01 = (i - 1) * grid_width + j;
                         var i10 = i * grid_width + (j - 1);
@@ -592,7 +718,10 @@
                         return;
                     }
                     if (series.is3d) {
-                        var transformed_point = [point.axisXpos, point.axisZpos];
+                        var transformed_point = [
+                            point.axisXpos,
+                            point.axisZpos,
+                        ];
                     } else {
                         var transformed_point = [point.plotX, point.plotY];
                     }
@@ -603,20 +732,38 @@
                 var delaunay_edges = [];
                 var outer_edges = options.outer_edges || [];
                 outer_edges.forEach(function (edge) {
-                    if (edge[0] in transformed_points && edge[1] in transformed_points) {
-                        delaunay_edges.push([transformed_points_indexes[edge[0]], transformed_points_indexes[edge[1]]]);
+                    if (
+                        edge[0] in transformed_points &&
+                        edge[1] in transformed_points
+                    ) {
+                        delaunay_edges.push([
+                            transformed_points_indexes[edge[0]],
+                            transformed_points_indexes[edge[1]],
+                        ]);
                     }
                 });
 
-                if (options.cdt2d || delaunay_edges.length != 0 || !window.Delaunay) {
-                    triangles = cdt2d(transformed_points, delaunay_edges, options.cdt2d).flat();
+                if (
+                    options.cdt2d ||
+                    delaunay_edges.length != 0 ||
+                    !window.Delaunay
+                ) {
+                    triangles = cdt2d(
+                        transformed_points,
+                        delaunay_edges,
+                        options.cdt2d,
+                    ).flat();
                 } else {
                     triangles = Delaunay.triangulate(transformed_points);
                 }
             }
 
             for (i = 0; i < triangles.length - 2; i += 3) {
-                appendTriangle(triangles[i], triangles[i + 1], triangles[i + 2]);
+                appendTriangle(
+                    triangles[i],
+                    triangles[i + 1],
+                    triangles[i + 2],
+                );
             }
 
             // Remove extra unused triangles from previous rendering
@@ -631,7 +778,10 @@
                     series.triangles[i].gradient.destroy();
                 }
             }
-            series.triangles.splice(triangle_count, series.triangles.length - triangle_count);
+            series.triangles.splice(
+                triangle_count,
+                series.triangles.length - triangle_count,
+            );
 
             //Assign triangles in groups (drawing layers)
             this.assignGroups();
@@ -654,7 +804,10 @@
                             contours.push({ axis: series.zAxis, attr: "z" });
                             break;
                         case "value":
-                            contours.push({ axis: series.colorAxis, attr: "value" });
+                            contours.push({
+                                axis: series.colorAxis,
+                                attr: "value",
+                            });
                             break;
                     }
                 });
@@ -670,7 +823,7 @@
                     pick(options.showFaces, true),
                     pick(options.showEdges, false),
                     pick(options.showTriangles, false),
-                    contours
+                    contours,
                 );
             }
 
@@ -710,7 +863,12 @@
     });
 
     var triangleArea = function (a, b, c) {
-        return (a.plotX * (b.plotY - c.plotY) + b.plotX * (c.plotY - a.plotY) + c.plotX * (a.plotY - b.plotY)) / 2;
+        return (
+            (a.plotX * (b.plotY - c.plotY) +
+                b.plotX * (c.plotY - a.plotY) +
+                c.plotX * (a.plotY - b.plotY)) /
+            2
+        );
     };
 
     /**
@@ -737,9 +895,11 @@
             valueInterval,
             [1, 2, 5, 10],
             H.getMagnitude(valueInterval),
-            true
+            true,
         );
-        var roundValue = H.correctFloat(roundedValueInterval * Math.round(value / roundedValueInterval));
+        var roundValue = H.correctFloat(
+            roundedValueInterval * Math.round(value / roundedValueInterval),
+        );
         return roundValue;
     };
 
@@ -824,9 +984,15 @@
         var yAxis = axis.contourSeries.yAxis;
         if (axis.isXAxis) {
             x = xAxis.toValue(pixels, true);
-            y = yAxis.toValue(!axis.opposite !== !axis.chart.inverted ? 0 : yAxis.len, true);
+            y = yAxis.toValue(
+                !axis.opposite !== !axis.chart.inverted ? 0 : yAxis.len,
+                true,
+            );
         } else {
-            x = xAxis.toValue(!axis.opposite !== !axis.chart.inverted ? xAxis.len : 0, true);
+            x = xAxis.toValue(
+                !axis.opposite !== !axis.chart.inverted ? xAxis.len : 0,
+                true,
+            );
             y = yAxis.toValue(pixels, true);
         }
         return {
@@ -842,7 +1008,9 @@
             contourSeries = find(axis.chart.series, function (serie) {
                 if (axis.options.serie) {
                     return (
-                        serie.id === axis.options.serie || (serie.options && serie.options.id === axis.options.serie)
+                        serie.id === axis.options.serie ||
+                        (serie.options &&
+                            serie.options.id === axis.options.serie)
                     );
                 } else {
                     return serie.type === "contour";
@@ -854,11 +1022,15 @@
             }
             axis.contourSeries = contourSeries;
             each(contourSeries.axisTypes || [], function (AXIS) {
-                wrap(contourSeries[AXIS], "setTickPositions", function (proceed) {
-                    proceed.apply(this, [].slice.call(arguments, 1));
-                    axis.forceRedraw = true;
-                    axis.setScale();
-                });
+                wrap(
+                    contourSeries[AXIS],
+                    "setTickPositions",
+                    function (proceed) {
+                        proceed.apply(this, [].slice.call(arguments, 1));
+                        axis.forceRedraw = true;
+                        axis.setScale();
+                    },
+                );
             });
         }
         var valueTicks = contourSeries.colorAxis.tickPositions;
@@ -868,11 +1040,16 @@
         var labels = {};
         for (var i = 0; i <= axis.len; i++) {
             var x2 = axis.toValue(i, true);
-            var v2 = contourSeries.dataFunction(contourAxisGetCoordinate(axis, i)).value;
+            var v2 = contourSeries.dataFunction(
+                contourAxisGetCoordinate(axis, i),
+            ).value;
             if (i > 0 && v1 !== v2) {
                 for (var tickIndex in valueTicks) {
                     var tickValue = valueTicks[tickIndex];
-                    if (tickValue >= Math.min(v1, v2) && tickValue <= Math.max(v1, v2)) {
+                    if (
+                        tickValue >= Math.min(v1, v2) &&
+                        tickValue <= Math.max(v1, v2)
+                    ) {
                         var q = (tickValue - v1) / (v2 - v1);
                         var pos = q * (x2 - x1) + x1;
                         ret.push(pos);
@@ -905,7 +1082,7 @@
                     startOnTick: false,
                     endOnTick: false,
                     tickPositioner: contourAxisTickPositioner,
-                }
+                },
             );
         }
 
